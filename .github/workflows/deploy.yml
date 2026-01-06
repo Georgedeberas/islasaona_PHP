@@ -1,0 +1,38 @@
+name: 🚀 Despliegue Automático a iPage
+
+on:
+  push:
+    branches:
+      - main  # Asegúrate de que tu rama principal se llame 'main'. Si es 'master', cambia esto a 'master'.
+
+jobs:
+  web-deploy:
+    name: 🎉 Subiendo archivos al Hosting
+    runs-on: ubuntu-latest
+    steps:
+    
+    # Paso 1: Obtener el código más reciente de GitHub
+    - name: 🚚 Obtener código (Checkout)
+      uses: actions/checkout@v4
+
+    # Paso 2: Conectar por FTP y subir los archivos
+    - name: 📂 Sincronizar archivos (FTP Deploy)
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        
+        # IMPORTANTE: Configuración de la carpeta destino
+        # Si el usuario FTP 'islasaona' ya está configurado en iPage para caer directo en la carpeta del proyecto, usa: ./
+        # Si el usuario FTP cae en la raíz general del hosting, usa: /Mochilerosrd/islasaona/
+        # Por seguridad, probaremos primero asumiendo que el usuario FTP ya apunta a la carpeta correcta:
+        server-dir: ./
+        
+        # Archivos que NO queremos subir al hosting
+        exclude: |
+          **/.git*
+          **/.github*
+          README.md
+          config/database_local.php
+          .env.example
