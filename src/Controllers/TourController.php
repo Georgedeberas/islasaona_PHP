@@ -1,5 +1,8 @@
 <?php
-require_once __DIR__ . '/../Models/Tour.php';
+
+namespace App\Controllers;
+
+use App\Models\Tour;
 
 class TourController
 {
@@ -10,7 +13,7 @@ class TourController
 
         if (!$tour) {
             http_response_code(404);
-            echo "Tour no encontrado"; // Idealmente una vista 404 bonita
+            echo "Tour no encontrado";
             return;
         }
 

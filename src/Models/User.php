@@ -1,5 +1,9 @@
 <?php
 
+namespace App\Models;
+
+use App\Config\Database;
+
 class User
 {
     private $db;
@@ -23,7 +27,6 @@ class User
         return password_verify($inputPassword, $hash);
     }
 
-    // Método helper para crear usuarios (útil para seeds o admin)
     public function create($email, $password, $role = 'admin')
     {
         $hash = password_hash($password, PASSWORD_DEFAULT);

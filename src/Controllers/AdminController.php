@@ -1,6 +1,9 @@
 <?php
-require_once __DIR__ . '/AuthController.php';
-require_once __DIR__ . '/../Models/Tour.php';
+
+namespace App\Controllers;
+
+use App\Models\Tour;
+use Exception;
 
 class AdminController
 {
@@ -36,7 +39,6 @@ class AdminController
             $tourModel = new Tour();
             $allTours = $tourModel->getAll(false);
             $tour = null;
-            // Búsqueda lineal temporal (Mejorar con getById en el futuro)
             foreach ($allTours as $t) {
                 if ($t['id'] == $id) {
                     $tour = $t;
@@ -61,13 +63,11 @@ class AdminController
     private function handleSaveTour($id = null)
     {
         try {
-            // ACTIVAR DEBUG EN STORE TAMBIÉN
             ini_set('display_errors', 1);
             error_reporting(E_ALL);
 
             $tourModel = new Tour();
 
-            // 1. Preparar Datos
             if (!isset($_POST['title']) || empty($_POST['title'])) {
                 throw new Exception("El título es obligatorio.");
             }
@@ -84,22 +84,20 @@ class AdminController
                 'display_style' => $_POST['display_style'] ?? 'grid',
                 'meta_title' => $_POST['meta_title'] ?? '',
                 'meta_description' => $_POST['meta_description'] ?? '',
-                'includes' => json_encode(array_filter(explode("\n", $_POST['includes'] ?? ''))),
-                'not_included' => json_encode(array_filter(explode("\n", $_POST['not_included'] ?? '')))
+                'includes' => array_filter(explode("\n", $_POST['includes'] ?? '')), // Array puro, el modelo lo convierte a JSON
+                'not_included' => array_filter(explode("\n", $_POST['not_included'] ?? '')) // Array puro
             ];
 
-            // 2. Guardar en BD (Crear o Actualizar)
             if ($id) {
-                unset($data['slug']); // No cambiar slug al editar para no romper SEO
+                unset($data['slug']);
                 if (!$tourModel->update($id, $data)) {
                     throw new Exception("Error al actualizar en Base de Datos.");
                 }
                 $tourId = $id;
             } else {
-                // Verificar si slug existe (básico)
                 $existing = $tourModel->getBySlug($data['slug']);
                 if ($existing) {
-                    $data['slug'] .= '-' . time(); // Hook simple para unicidad
+                    $data['slug'] .= '-' . time();
                 }
 
                 $tourId = $tourModel->create($data);
@@ -108,28 +106,23 @@ class AdminController
                 }
             }
 
-            // 3. Manejo de Imágenes ROBUS-TO
+            // Manejo de Imágenes
             if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
-
-                // Definir ruta absoluta
                 $uploadDirRelative = '/assets/uploads/';
                 $uploadDirAbsolute = __DIR__ . '/../../public' . $uploadDirRelative;
 
-                // Verificar si existe carpeta uploads
                 if (!is_dir($uploadDirAbsolute)) {
                     if (!mkdir($uploadDirAbsolute, 0755, true)) {
                         throw new Exception("CRÍTICO: No se puede crear la carpeta de uploads en: " . $uploadDirAbsolute);
                     }
                 }
 
-                // Verificar permisos de escritura check
                 if (!is_writable($uploadDirAbsolute)) {
                     throw new Exception("CRÍTICO: La carpeta uploads NO tiene permisos de escritura: " . $uploadDirAbsolute);
                 }
 
                 foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
                     $error = $_FILES['images']['error'][$key];
-
                     if ($error === UPLOAD_ERR_OK) {
                         $name = basename($_FILES['images']['name'][$key]);
                         $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
@@ -139,7 +132,6 @@ class AdminController
                             $destination = $uploadDirAbsolute . $newName;
 
                             if (move_uploaded_file($tmp_name, $destination)) {
-                                // Guardar path relativo en BD (sin public/)
                                 $dbPath = 'assets/uploads/' . $newName;
                                 $isCover = ($key === 0 && !$id) ? 1 : 0;
                                 $tourModel->addImage($tourId, $dbPath, $isCover);
@@ -147,8 +139,6 @@ class AdminController
                                 throw new Exception("Error moviendo archivo subido: " . $name);
                             }
                         }
-                    } elseif ($error !== UPLOAD_ERR_NO_FILE) {
-                        throw new Exception("Error en subida de archivo código: " . $error);
                     }
                 }
             }
@@ -157,7 +147,6 @@ class AdminController
             exit;
 
         } catch (Exception $e) {
-            // Mostrar error feo pero útil para debuggear
             die("<div style='background:red; color:white; padding:20px;'><h1>Error Guardando Tour</h1><p>" . $e->getMessage() . "</p><a href='javascript:history.back()' style='color:yellow'>Volver</a></div>");
         }
     }

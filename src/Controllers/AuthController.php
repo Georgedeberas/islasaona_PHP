@@ -1,8 +1,10 @@
 <?php
-session_start();
 
-require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../Models/User.php';
+namespace App\Controllers;
+
+use App\Models\User;
+
+session_start();
 
 class AuthController
 {
@@ -16,7 +18,6 @@ class AuthController
             $user = $userModel->findByEmail($email);
 
             if ($user && password_verify($password, $user['password_hash'])) {
-                // Regenerar ID de sesión para prevenir Session Fixation
                 session_regenerate_id(true);
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_role'] = $user['role'];
@@ -29,7 +30,6 @@ class AuthController
                 require __DIR__ . '/../Views/admin/login.php';
             }
         } else {
-            // Si ya está logueado, ir al dashboard
             if (isset($_SESSION['user_id'])) {
                 header('Location: /admin/dashboard');
                 exit;

@@ -1,5 +1,8 @@
 <?php
-require_once __DIR__ . '/../Models/Tour.php';
+
+namespace App\Controllers;
+
+use App\Models\Tour;
 
 class HomeController
 {
@@ -9,6 +12,7 @@ class HomeController
         $tours = $tourModel->getAll(true); // Solo activos
 
         // Vista Home
+        // Ajustamos la ruta al estar en src/Controllers
         require __DIR__ . '/../Views/front/home.php';
     }
 }
