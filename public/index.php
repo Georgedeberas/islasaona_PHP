@@ -1,7 +1,7 @@
 <?php
 // public/index.php - Punto de entrada principal
 
-// ACTIVAR DEBUGGING TEMPORALMENTE
+// ACTIVAR DEBUGGING TEMPORALMENTE (Quitar en prod real)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -13,6 +13,8 @@ use App\Controllers\HomeController;
 use App\Controllers\TourController;
 use App\Controllers\AdminController;
 use App\Controllers\AuthController;
+use App\Controllers\SettingController;
+use App\Controllers\PageController;
 
 try {
     // Router Básico
@@ -20,8 +22,6 @@ try {
 
     // Rutas Admin
     if (strpos($requestUri, '/admin') === 0) {
-        // Auth Check manual si es necesario, o dentro de los constructores
-
         $auth = new AuthController();
 
         if ($requestUri === '/admin/login') {
@@ -42,6 +42,9 @@ try {
             }
             $admin = new AdminController();
             $admin->editTour($id);
+        } elseif ($requestUri === '/admin/settings') {
+            $settings = new SettingController();
+            $settings->index();
         } else {
             header('Location: /admin/dashboard');
         }
@@ -56,14 +59,24 @@ try {
         $slug = $matches[1];
         $tourController = new TourController();
         $tourController->detail($slug);
+    } elseif ($requestUri === '/about' || $requestUri === '/contact') {
+        // Rutas estáticas manejadas por PageController
+        $slug = trim($requestUri, '/');
+        $pageController = new PageController();
+        $pageController->show($slug);
     } else {
         http_response_code(404);
-        echo "<h1>404 Not Found</h1><p>Página no encontrada.</p><a href='/'>Ir al Inicio</a>";
+        require __DIR__ . '/../src/Views/layout/header.php';
+        echo "<div class='container py-20 text-center'>
+                <h1 class='text-4xl font-bold text-gray-800 mb-4'>404</h1>
+                <p class='text-gray-600 mb-8'>Página no encontrada.</p>
+                <a href='/' class='btn bg-primary text-white px-6 py-3 rounded'>Volver al Inicio</a>
+              </div>";
+        require __DIR__ . '/../src/Views/layout/footer.php';
     }
 
 } catch (Throwable $e) {
     http_response_code(500);
     echo "<h1>Error Crítico (500)</h1>";
     echo "<p>" . $e->getMessage() . "</p>";
-    echo "<pre>" . $e->getTraceAsString() . "</pre>";
 }

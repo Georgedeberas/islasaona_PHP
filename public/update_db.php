@@ -1,6 +1,6 @@
 <?php
 // public/update_db.php
-// Script de reparación de DB y Diagnóstico
+// Script de reparación de DB y Diagnóstico V2 (CMS Update)
 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -9,14 +9,14 @@ require_once __DIR__ . '/../src/autoload.php';
 
 use App\Config\Database;
 
-echo "<h1>Diagnóstico y Actualización de DB</h1>";
+echo "<h1>Diagnóstico y Actualización de DB (Fase CMS)</h1>";
 
 try {
     $db = Database::getConnection();
     echo "<p style='color:green'>✅ Conexión a Base de Datos EXITOSA.</p>";
 
-    // Tablas
-    $sql = "
+    // 1. Tablas Core (Ya deberían existir, usamos IF NOT EXISTS)
+    $sqlCore = "
     CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
         email VARCHAR(255) NOT NULL UNIQUE,
@@ -54,24 +54,61 @@ try {
         FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     ";
+    $db->exec($sqlCore);
+    echo "<p style='color:green'>✅ Tablas Core verificadas.</p>";
 
-    // Ejecutar creación de tablas
-    $db->exec($sql);
-    echo "<p style='color:green'>✅ Tablas verificadas/creadas.</p>";
+    // 2. Tablas CMS (Settings & Pages)
+    $sqlCMS = "
+    CREATE TABLE IF NOT EXISTS settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        setting_key VARCHAR(50) NOT NULL UNIQUE,
+        setting_value TEXT,
+        label VARCHAR(100),
+        type ENUM('text', 'textarea', 'image') DEFAULT 'text',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-    // Crear Admin por defecto si no existe
-    $email = 'admin@mochilerosrd.com';
-    $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
-    $stmt->execute([$email]);
+    CREATE TABLE IF NOT EXISTS pages (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        slug VARCHAR(50) NOT NULL UNIQUE,
+        title VARCHAR(255) NOT NULL,
+        content LONGTEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ";
+    $db->exec($sqlCMS);
+    echo "<p style='color:green'>✅ Tablas CMS verificadas/creadas.</p>";
 
-    if ($stmt->rowCount() == 0) {
-        $passHash = password_hash('admin123', PASSWORD_DEFAULT);
-        $stmt = $db->prepare("INSERT INTO users (email, password_hash, role) VALUES (?, ?, 'admin')");
-        $stmt->execute([$email, $passHash]);
-        echo "<p style='color:green'>✅ Usuario Admin creado: $email / admin123</p>";
-    } else {
-        echo "<p style='color:blue'>ℹ️ El usuario admin ya existe.</p>";
+    // 3. Seed Default Settings
+    $defaultSettings = [
+        ['company_name', 'Mochileros RD', 'Nombre de la Empresa'],
+        ['phone_main', '1-829-000-0000', 'Teléfono Principal'],
+        ['whatsapp_number', '18290000000', 'Número WhatsApp (Sin guiones)'],
+        ['email_contact', 'info@mochilerosrd.com', 'Email de Contacto'],
+        ['address', 'Santo Domingo, República Dominicana', 'Dirección Física'],
+        ['facebook_url', '#', 'URL Facebook'],
+        ['instagram_url', '#', 'URL Instagram'],
+        ['tiktok_url', '#', 'URL TikTok'],
+        ['footer_text', 'Explora los rincones más bellos de República Dominicana con nosotros.', 'Texto Footer']
+    ];
+
+    $stmtSet = $db->prepare("INSERT IGNORE INTO settings (setting_key, setting_value, label) VALUES (?, ?, ?)");
+    foreach ($defaultSettings as $setting) {
+        $stmtSet->execute($setting);
     }
+    echo "<p style='color:green'>✅ Configuración base insertada.</p>";
+
+    // 4. Seed Default Pages
+    $defaultPages = [
+        ['about', 'Sobre Nosotros', '<h1>¡Hola! Somos Mochileros RD</h1><p>Tu agencia de confianza para conocer República Dominicana.</p>'],
+        ['contact', 'Contacto', '<p>Ponte en contacto con nosotros.</p>']
+    ];
+    $stmtPage = $db->prepare("INSERT IGNORE INTO pages (slug, title, content) VALUES (?, ?, ?)");
+    foreach ($defaultPages as $page) {
+        $stmtPage->execute($page);
+    }
+    echo "<p style='color:green'>✅ Páginas estáticas base insertadas.</p>";
 
     // Check de permisos carpeta uploads
     $uploadPath = __DIR__ . '/assets/uploads';
@@ -79,17 +116,19 @@ try {
         if (mkdir($uploadPath, 0755, true)) {
             echo "<p style='color:green'>✅ Carpeta uploads creada.</p>";
         } else {
-            echo "<p style='color:red'>❌ Error creando carpeta uploads. Hazlo manualmente.</p>";
+            echo "<p style='color:red'>❌ Error creando carpeta uploads.</p>";
         }
     }
 
-    if (is_writable($uploadPath)) {
-        echo "<p style='color:green'>✅ Carpeta uploads tiene permisos de escritura.</p>";
-    } else {
-        echo "<p style='color:red; font-weight:bold;'>❌ Carpeta uploads NO es escribible. Necesita permisos 755 o 777.</p>";
+    // Check carpeta images (Logos)
+    $imagesPath = __DIR__ . '/assets/images';
+    if (!is_dir($imagesPath)) {
+        if (mkdir($imagesPath, 0755, true)) {
+            echo "<p style='color:green'>✅ Carpeta assets/images creada.</p>";
+        }
     }
 
-    echo "<hr><h3>Todo listo. Elimina este archivo 'update_db.php' y prueba el sitio.</h3>";
+    echo "<hr><h3>Actualización Completa.</h3>";
     echo "<a href='/'>Ir al Inicio</a> | <a href='/admin/login'>Ir al Admin</a>";
 
 } catch (Exception $e) {
