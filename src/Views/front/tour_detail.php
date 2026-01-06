@@ -253,9 +253,13 @@ require __DIR__ . '/../layout/header.php';
 </div>
 
 <script>
-    // Configuración del teléfono desde PHP
-    // Si no hay teléfono configurado, usar uno generico o alertar
-    const ADMIN_PHONE = "<?= !empty($whatsapp) ? $whatsapp : '18290000000' ?>";
+    // Configuración del teléfono desde PHP (Sanitizado)
+    <?php 
+        // Eliminar todo lo que no sea digitos
+        $cleanPhone = preg_replace('/[^0-9]/', '', $whatsapp);
+        if(empty($cleanPhone)) $cleanPhone = '18290000000';
+    ?>
+    const ADMIN_PHONE = "<?= $cleanPhone ?>";
 
     function openBookingModal() {
         const modal = document.getElementById('bookingModal');
