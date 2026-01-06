@@ -3,17 +3,11 @@
 namespace App\Controllers;
 
 use App\Models\Page;
-use App\Models\Database; // Ensure we have DB access if needed, though Page model handles it
-use Exception;
 
 class PageController
 {
 
-    public function __construct()
-    {
-        // Constructor vacío o lógica de init si hace falta
-    }
-
+    // FRONTEND
     public function show($slug)
     {
         $pageModel = new Page();
@@ -27,17 +21,12 @@ class PageController
             return;
         }
 
-        // Determinar vista basada en slug o usar genérica
         $viewPath = __DIR__ . '/../Views/front/' . $slug . '.php';
-
-        if (file_exists($viewPath) && ($slug === 'about' || $slug === 'contact')) {
-            // Pasamos $page y $settings (necesario recargarlo o pasarlo global)
-            // Para simplicidad en este MVP, las vistas 'page' hacen su propio require de header que carga settings
+        if (file_exists($viewPath)) {
             require $viewPath;
             return;
         }
 
-        // Layout genérico para páginas de contenido puro
         require __DIR__ . '/../Views/layout/header.php';
         ?>
         <div class="py-12 bg-gray-50">
@@ -52,45 +41,80 @@ class PageController
         require __DIR__ . '/../Views/layout/footer.php';
     }
 
-    // LISTADO ADMIN
+    // ADMIN: LISTAR
     public function index()
     {
         AuthController::requireLogin();
-        $db = \App\Config\Database::getConnection();
-        $stmt = $db->query("SELECT * FROM pages ORDER BY title ASC");
-        $pages = $stmt->fetchAll();
-
+        $pageModel = new Page();
+        $pages = $pageModel->getAll();
         require __DIR__ . '/../Views/admin/pages/index.php';
     }
 
-    // EDICIÓN ADMIN
-    public function edit()
+    // ADMIN: CREAR
+    public function create()
     {
         AuthController::requireLogin();
 
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $title = $_POST['title'] ?? '';
+            $slug = $_POST['slug'] ?? '';
+            $content = $_POST['content'] ?? '';
+
+            // Simple slugify si viene vacio o limpiar
+            if (empty($slug)) {
+                $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title)));
+            } else {
+                $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $slug)));
+            }
+
+            $pageModel = new Page();
+            // Validar unico no implementado en detalle aqui, asumimos DB error si dup key
+            try {
+                if ($pageModel->create($title, $slug, $content)) {
+                    header('Location: /admin/pages?saved=1');
+                    exit;
+                }
+            } catch (\Exception $e) {
+                $error = "Error al crear: Probablemente el slug ya existe.";
+            }
+        }
+
+        require __DIR__ . '/../Views/admin/pages/create.php';
+    }
+
+    // ADMIN: EDITAR
+    public function edit()
+    {
+        AuthController::requireLogin();
         $id = $_GET['id'] ?? null;
         if (!$id) {
-            header('Location: /admin/dashboard');
+            header('Location: /admin/pages');
             exit;
         }
+
+        $pageModel = new Page();
+        // Usar DB crudo o agregar getById al Modelo (vamos a usar getById ad-hoc o query directa desde controller para rapido, o mejor GetAll y filtrar como antes, para no romper compatibilidad si no edito modelo... pero ya edité modelo arriba para tener update con slug)
+        // Oops, no agregué getById en el último paso al modelo Page.php, pero sí getAll, getBySlug. 
+        // Vamos a usar una query directa aqui rápido o updatear Page.php en la mente.
+        // Espera, el modelo Page.php lo acabo de sobrescribir y NO tiene getById. Usaré Database directo para leer por ID.
 
         $db = \App\Config\Database::getConnection();
         $stmt = $db->prepare("SELECT * FROM pages WHERE id = :id");
         $stmt->execute([':id' => $id]);
         $page = $stmt->fetch();
 
-        if (!$page) {
+        if (!$page)
             die("Página no encontrada");
-        }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $content = $_POST['content'] ?? '';
-            // Permitir HTML seguro (en un entorno real se usaría HTMLPurifier, 
-            // aquí confiamos en el admin pero advertimos riesgo XSS si el admin es malicioso)
+            $title = $_POST['title'];
+            $slug = $_POST['slug'];
+            $content = $_POST['content'];
 
-            $stmtUpdate = $db->prepare("UPDATE pages SET content = :content WHERE id = :id");
-            $stmtUpdate->execute([':content' => $content, ':id' => $id]);
+            // Clean slug
+            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $slug)));
 
+            $pageModel->update($id, $title, $slug, $content);
             header('Location: /admin/pages?saved=1');
             exit;
         }

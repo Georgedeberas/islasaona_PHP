@@ -1,5 +1,5 @@
 <?php
-// public/index.php - Actualizado rutas CMS
+// public/index.php - Updated with Create/Store routes
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -26,33 +26,23 @@ try {
         } elseif ($requestUri === '/admin/logout') {
             $auth->logout();
         } elseif ($requestUri === '/admin/dashboard') {
-            $admin = new AdminController();
-            $admin->dashboard();
+            (new AdminController())->dashboard();
         } elseif ($requestUri === '/admin/tours') {
-            $admin = new AdminController();
-            $admin->tours();
+            (new AdminController())->tours();
         } elseif ($requestUri === '/admin/tours/create') {
-            $admin = new AdminController();
-            $admin->createTour();
+            (new AdminController())->createTour();
         } elseif ($requestUri === '/admin/tours/edit') {
-            $id = $_GET['id'] ?? null;
-            if (!$id)
-                header('Location: /admin/tours'); // Redirect to tours list
-            else {
-                $admin = new AdminController();
-                $admin->editTour($id);
-            }
+            (new AdminController())->editTour($_GET['id'] ?? null);
         } elseif ($requestUri === '/admin/settings') {
-            $settings = new SettingController();
-            $settings->index();
+            (new SettingController())->index();
         } elseif ($requestUri === '/admin/pages') {
-            $pages = new PageController();
-            $pages->index();
-        } elseif ($requestUri === '/admin/pages/edit') {
-            $pages = new PageController();
-            $pages->edit();
+            (new PageController())->index();
+        } elseif ($requestUri === '/admin/pages/create') {
+            (new PageController())->create();
+        } // NEW
+        elseif ($requestUri === '/admin/pages/edit') {
+            (new PageController())->edit();
         } else {
-            // Default admin landing
             header('Location: /admin/dashboard');
         }
         exit;
@@ -63,22 +53,23 @@ try {
         $home = new HomeController();
         $home->index();
     } elseif (preg_match('#^/tour/([\w-]+)$#', $requestUri, $matches)) {
-        $slug = $matches[1];
         $tourController = new TourController();
-        $tourController->detail($slug);
-    } elseif ($requestUri === '/about' || $requestUri === '/contact') {
-        $slug = trim($requestUri, '/');
-        $pageController = new PageController();
-        $pageController->show($slug);
+        $tourController->detail($matches[1]);
     } else {
-        http_response_code(404);
-        require __DIR__ . '/../src/Views/layout/header.php';
-        echo "<div class='container py-20 text-center'>
-                <h1 class='text-4xl font-bold text-gray-800 mb-4'>404</h1>
-                <p class='text-gray-600 mb-8'>Página no encontrada.</p>
-                <a href='/' class='btn bg-primary text-white px-6 py-3 rounded'>Volver al Inicio</a>
-              </div>";
-        require __DIR__ . '/../src/Views/layout/footer.php';
+        // Rutas dinámicas (slugs de páginas)
+        // Intentar cargar como página estática si no matchea nada más
+        $slug = trim($requestUri, '/');
+        // Sanitizar básico
+        $slug = filter_var($slug, FILTER_SANITIZE_URL);
+
+        if (!empty($slug)) {
+            $pageController = new PageController();
+            $pageController->show($slug);
+        } else {
+            // Raiz ya manejada, pero por seguridad
+            $home = new HomeController();
+            $home->index();
+        }
     }
 
 } catch (Throwable $e) {

@@ -16,8 +16,13 @@
 
         <!-- Main Content -->
         <div class="flex-grow-1 p-5">
-            <h2 class="mb-4">Gestión de Contenidos</h2>
-            <p class="text-muted">Selecciona una página para editar su texto e imágenes.</p>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-0">Gestión de Contenidos</h2>
+                    <p class="text-muted mb-0">Páginas dinámicas del sitio.</p>
+                </div>
+                <a href="/admin/pages/create" class="btn btn-success fw-bold">+ Crear Nueva Página</a>
+            </div>
 
             <?php if (isset($_GET['saved'])): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -43,17 +48,14 @@
                                     <td class="ps-4 fw-bold">
                                         <?= htmlspecialchars($page['title']) ?>
                                     </td>
-                                    <td><span class="badge bg-light text-dark font-monospace">/
-                                            <?= $page['slug'] ?>
-                                        </span></td>
-                                    <td>
-                                        <?= $page['updated_at'] ?? $page['created_at'] ?>
+                                    <td><span class="badge bg-light text-dark font-monospace">/<?= $page['slug'] ?></span>
                                     </td>
+                                    <td><?= $page['updated_at'] ?? $page['created_at'] ?></td>
                                     <td class="text-end pe-4">
                                         <a href="/<?= $page['slug'] ?>" target="_blank"
                                             class="btn btn-sm btn-outline-info me-1">Ver</a>
                                         <a href="/admin/pages/edit?id=<?= $page['id'] ?>"
-                                            class="btn btn-sm btn-primary">Editar Contenido</a>
+                                            class="btn btn-sm btn-primary">Editar</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
