@@ -1,27 +1,18 @@
 <?php
-// ACTIVAR DEBUGGING (Solo para diagnóstico, quitar en producción real luego)
+// public/index.php - Punto de entrada principal
+
+// ACTIVAR DEBUGGING TEMPORALMENTE
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Autoloader simple
-spl_autoload_register(function ($class_name) {
-    // Mapeo básico de clases a rutas
-    $paths = [
-        '../src/Controllers/',
-        '../src/Models/',
-        '../src/Views/', // Por si acaso
-        '../config/'
-    ];
+// Cargar Autoloader
+require_once __DIR__ . '/../src/autoload.php';
 
-    foreach ($paths as $path) {
-        $file = __DIR__ . '/' . $path . $class_name . '.php';
-        if (file_exists($file)) {
-            require_once $file;
-            return;
-        }
-    }
-});
+use App\Controllers\HomeController;
+use App\Controllers\TourController;
+use App\Controllers\AdminController;
+use App\Controllers\AuthController;
 
 try {
     // Router Básico
@@ -29,8 +20,7 @@ try {
 
     // Rutas Admin
     if (strpos($requestUri, '/admin') === 0) {
-        require_once __DIR__ . '/../src/Controllers/AuthController.php';
-        require_once __DIR__ . '/../src/Controllers/AdminController.php';
+        // Auth Check manual si es necesario, o dentro de los constructores
 
         $auth = new AuthController();
 
@@ -53,16 +43,12 @@ try {
             $admin = new AdminController();
             $admin->editTour($id);
         } else {
-            // Default admin redirect
             header('Location: /admin/dashboard');
         }
         exit;
     }
 
     // Rutas Públicas
-    require_once __DIR__ . '/../src/Controllers/HomeController.php';
-    require_once __DIR__ . '/../src/Controllers/TourController.php';
-
     if ($requestUri === '/' || $requestUri === '/index.php') {
         $home = new HomeController();
         $home->index();
@@ -71,18 +57,13 @@ try {
         $tourController = new TourController();
         $tourController->detail($slug);
     } else {
-        // Fallback 404
         http_response_code(404);
-        echo "<h1>404 Not Found</h1><p>La página que buscas no existe.</p>";
+        echo "<h1>404 Not Found</h1><p>Página no encontrada.</p><a href='/'>Ir al Inicio</a>";
     }
 
 } catch (Throwable $e) {
-    // Capturar errores fatales globales
     http_response_code(500);
-    echo "<h1>Error del Servidor (500)</h1>";
-    echo "<pre style='background:#f4f4f4; padding:15px; border:1px solid #ccc; border-radius:5px;'>";
-    echo "Mensaje: " . htmlspecialchars($e->getMessage()) . "\n";
-    echo "Archivo: " . $e->getFile() . "\n";
-    echo "Línea: " . $e->getLine() . "\n";
-    echo "</pre>";
+    echo "<h1>Error Crítico (500)</h1>";
+    echo "<p>" . $e->getMessage() . "</p>";
+    echo "<pre>" . $e->getTraceAsString() . "</pre>";
 }

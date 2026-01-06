@@ -1,5 +1,10 @@
 <?php
 
+namespace App\Models;
+
+use App\Config\Database;
+use PDO;
+
 class Tour
 {
     private $db;
@@ -43,16 +48,30 @@ class Tour
 
     public function create($data)
     {
-        $sql = "INSERT INTO tours (title, slug, description_short, description_long, price_adult, price_child, duration, includes, not_included, display_style, meta_title, meta_description) 
-                VALUES (:title, :slug, :description_short, :description_long, :price_adult, :price_child, :duration, :includes, :not_included, :display_style, :meta_title, :meta_description)";
+        // SQL corregido con parámetros exactos
+        $sql = "INSERT INTO tours (title, slug, description_short, description_long, price_adult, price_child, duration, includes, not_included, display_style, meta_title, meta_description, is_active) 
+                VALUES (:title, :slug, :description_short, :description_long, :price_adult, :price_child, :duration, :includes, :not_included, :display_style, :meta_title, :meta_description, :is_active)";
 
         $stmt = $this->db->prepare($sql);
-        // Bind parameters simple
-        foreach ($data as $key => $value) {
-            $stmt->bindValue(':' . $key, $value);
-        }
 
-        if ($stmt->execute()) {
+        // Mapeo explicito para seguridad y debug
+        $params = [
+            ':title' => $data['title'],
+            ':slug' => $data['slug'],
+            ':description_short' => $data['description_short'],
+            ':description_long' => $data['description_long'],
+            ':price_adult' => $data['price_adult'],
+            ':price_child' => $data['price_child'],
+            ':duration' => $data['duration'],
+            ':includes' => is_array($data['includes']) ? json_encode($data['includes']) : $data['includes'],
+            ':not_included' => is_array($data['not_included']) ? json_encode($data['not_included']) : $data['not_included'],
+            ':display_style' => $data['display_style'],
+            ':meta_title' => $data['meta_title'],
+            ':meta_description' => $data['meta_description'],
+            ':is_active' => $data['is_active']
+        ];
+
+        if ($stmt->execute($params)) {
             return $this->db->lastInsertId();
         }
         return false;
@@ -61,19 +80,22 @@ class Tour
     public function update($id, $data)
     {
         $fields = [];
+        $params = [':id' => $id];
+
         foreach ($data as $key => $value) {
             $fields[] = "$key = :$key";
+            // Manejo especial para arrays JSON
+            if (($key === 'includes' || $key === 'not_included') && is_array($value)) {
+                $params[':' . $key] = json_encode($value);
+            } else {
+                $params[':' . $key] = $value;
+            }
         }
+
         $sql = "UPDATE tours SET " . implode(', ', $fields) . " WHERE id = :id";
-
         $stmt = $this->db->prepare($sql);
-        $data['id'] = $id;
 
-        foreach ($data as $key => $value) {
-            $stmt->bindValue(':' . $key, $value);
-        }
-
-        return $stmt->execute();
+        return $stmt->execute($params);
     }
 
     public function addImage($tourId, $imagePath, $isCover = 0)
