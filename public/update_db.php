@@ -128,6 +128,25 @@ try {
         }
     }
 
+    // 5. Tabla Analytics (Propia)
+    $sqlAnalytics = "
+    CREATE TABLE IF NOT EXISTS analytics_visits (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ip_address VARCHAR(45),
+        visitor_id VARCHAR(50),
+        page_url VARCHAR(255),
+        referrer TEXT,
+        user_agent TEXT,
+        country_code VARCHAR(3) DEFAULT 'XX',
+        city VARCHAR(100) DEFAULT 'Unknown',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_created_at (created_at),
+        INDEX idx_visitor (visitor_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ";
+    $db->exec($sqlAnalytics);
+    echo "<p style='color:green'>✅ Tabla de Analíticas activada.</p>";
+
     echo "<hr><h3>Actualización Completa.</h3>";
     echo "<a href='/'>Ir al Inicio</a> | <a href='/admin/login'>Ir al Admin</a>";
 

@@ -10,6 +10,10 @@ $settings = $settingModel->getAll();
 $pageModel = new Page();
 $menuPages = $pageModel->getAll();
 
+// Analytics Tracking (Local & Privado)
+use App\Services\Analytics;
+Analytics::track();
+
 // Fallbacks
 $companyName = $settings['company_name'] ?? 'Mochileros RD';
 $phone = $settings['phone_main'] ?? '';

@@ -20,12 +20,16 @@ class AdminController
             $tourModel = new Tour();
             $allTours = $tourModel->getAll(false); // Traer todos, activos e inactivos
 
-            // Calcular estadísticas
+            // Calcular estadísticas de Tours
             $stats = [
                 'total_tours' => count($allTours),
                 'active_tours' => count(array_filter($allTours, fn($t) => $t['is_active'] == 1)),
                 'inactive_tours' => count(array_filter($allTours, fn($t) => $t['is_active'] == 0)),
             ];
+
+            // Estadísticas de Tráfico (Analytics Service)
+            // Importante: Asegurarse de importar el namespace arriba o usar FQCN
+            $trafficStats = \App\Services\Analytics::getStats(30); // Últimos 30 días
 
             require __DIR__ . '/../Views/admin/dashboard.php';
         } catch (Exception $e) {

@@ -61,6 +61,85 @@
                 </div>
             </div>
 
+            <!-- Sección Analytics -->
+            <h3 class="mt-5 mb-4 text-secondary border-bottom pb-2">📊 Estadísticas de Tráfico (Últimos 30 días)</h3>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="card shadow-sm border-0 bg-white">
+                        <div class="card-body">
+                            <h6 class="text-muted text-uppercase small fw-bold">Visitas Totales</h6>
+                            <h2 class="display-6 fw-bold text-primary mb-0">
+                                <?= number_format($trafficStats['total_visits']) ?></h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="card shadow-sm border-0 bg-white">
+                        <div class="card-body">
+                            <h6 class="text-muted text-uppercase small fw-bold">Visitantes Únicos</h6>
+                            <h2 class="display-6 fw-bold text-success mb-0">
+                                <?= number_format($trafficStats['unique_visitors']) ?></h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <!-- Top Páginas -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold py-3">
+                            📄 Páginas Más Visitadas
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <?php if (empty($trafficStats['top_pages'])): ?>
+                                <li class="list-group-item text-muted text-center py-4">No hay datos aún.</li>
+                            <?php else: ?>
+                                <?php foreach ($trafficStats['top_pages'] as $page): ?>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="text-truncate"
+                                            style="max-width: 70%;"><?= htmlspecialchars($page['page_url']) ?></span>
+                                        <span class="badge bg-light text-dark rounded-pill border"><?= $page['visits'] ?>
+                                            hits</span>
+                                    </li>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Top Países -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white fw-bold py-3">
+                            🌍 Visitas por País
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <?php if (empty($trafficStats['top_countries'])): ?>
+                                <li class="list-group-item text-muted text-center py-4">No hay datos aún.</li>
+                            <?php else: ?>
+                                <?php foreach ($trafficStats['top_countries'] as $country): ?>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>
+                                            <?php if ($country['country_code'] !== 'XX'): ?>
+                                                <img src="https://flagcdn.com/16x12/<?= strtolower($country['country_code']) ?>.png"
+                                                    alt="<?= $country['country_code'] ?>" class="me-2">
+                                            <?php else: ?>
+                                                🏳️
+                                            <?php endif; ?>
+                                            <?= htmlspecialchars($country['country_code']) ?>
+                                        </span>
+                                        <span class="badge bg-light text-dark rounded-pill border"><?= $country['visits'] ?>
+                                            hits</span>
+                                    </li>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <div class="mt-5">
                 <h4 class="mb-3">Accesos Rápidos</h4>
                 <div class="d-flex gap-3">
