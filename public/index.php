@@ -1,12 +1,10 @@
 <?php
-// public/index.php - Punto de entrada principal
+// public/index.php - Actualizado rutas CMS
 
-// ACTIVAR DEBUGGING TEMPORALMENTE (Quitar en prod real)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Cargar Autoloader
 require_once __DIR__ . '/../src/autoload.php';
 
 use App\Controllers\HomeController;
@@ -17,7 +15,6 @@ use App\Controllers\SettingController;
 use App\Controllers\PageController;
 
 try {
-    // Router Básico
     $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
     // Rutas Admin
@@ -31,21 +28,31 @@ try {
         } elseif ($requestUri === '/admin/dashboard') {
             $admin = new AdminController();
             $admin->dashboard();
+        } elseif ($requestUri === '/admin/tours') {
+            $admin = new AdminController();
+            $admin->tours();
         } elseif ($requestUri === '/admin/tours/create') {
             $admin = new AdminController();
             $admin->createTour();
         } elseif ($requestUri === '/admin/tours/edit') {
             $id = $_GET['id'] ?? null;
-            if (!$id) {
-                header('Location: /admin/dashboard');
-                exit;
+            if (!$id)
+                header('Location: /admin/tours'); // Redirect to tours list
+            else {
+                $admin = new AdminController();
+                $admin->editTour($id);
             }
-            $admin = new AdminController();
-            $admin->editTour($id);
         } elseif ($requestUri === '/admin/settings') {
             $settings = new SettingController();
             $settings->index();
+        } elseif ($requestUri === '/admin/pages') {
+            $pages = new PageController();
+            $pages->index();
+        } elseif ($requestUri === '/admin/pages/edit') {
+            $pages = new PageController();
+            $pages->edit();
         } else {
+            // Default admin landing
             header('Location: /admin/dashboard');
         }
         exit;
@@ -60,7 +67,6 @@ try {
         $tourController = new TourController();
         $tourController->detail($slug);
     } elseif ($requestUri === '/about' || $requestUri === '/contact') {
-        // Rutas estáticas manejadas por PageController
         $slug = trim($requestUri, '/');
         $pageController = new PageController();
         $pageController->show($slug);
