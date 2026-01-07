@@ -14,6 +14,42 @@ class Tour
         $this->db = Database::getConnection();
     }
 
+    // Campos permitidos para asignación masiva
+    protected $fillable = [
+        'title',
+        'slug',
+        'description_short',
+        'description_long',
+        'price_adult',
+        'price_child',
+        'duration',
+        'location',
+        'includes',
+        'not_included',
+        'is_active',
+        // SEO Fields
+        'seo_title',
+        'seo_description',
+        'keywords',
+        'schema_type',
+        'rating_score',
+        'review_count',
+        'tour_highlights',
+        // Extended Info Fields (2026 Update)
+        'info_cost',
+        'info_dates_text',
+        'info_duration',
+        'info_includes',
+        'info_visiting',
+        'info_not_included',
+        'info_departure',
+        'info_parking',
+        'info_important',
+        'info_what_to_bring',
+        'frequency_type',
+        'specific_dates'
+    ];
+
     public function getAll($activeOnly = true)
     {
         $sql = "SELECT t.*, (SELECT image_path FROM tour_images WHERE tour_id = t.id AND is_cover = 1 LIMIT 1) as cover_image 
