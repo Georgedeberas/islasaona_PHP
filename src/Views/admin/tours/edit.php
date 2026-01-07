@@ -38,7 +38,7 @@
             box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
             display: flex; justify-content: space-between; align-items: center;
         }
-        .main-content { padding-bottom: 80px; } /* Space for FAB */
+        .main-content { padding-bottom: 150px; } /* Space for FAB */
     </style>
 </head>
 <body>
@@ -333,6 +333,7 @@ if (isset($_GET['success'])): ?>
 </div>
 
 <!-- JS Logic -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // Toggle Specific Dates
     const freqSelect = document.getElementById('frequency_select');

@@ -161,12 +161,14 @@ require __DIR__ . '/../layout/header.php';
         <?php endif; ?>
 
         <!-- Descripción General -->
-        <div class="border-b border-gray-100 pb-8">
-            <h2 class="text-2xl font-bold mb-4 text-secondary">Descripción de la Experiencia</h2>
-            <div class="prose max-w-none text-gray-600 leading-relaxed">
-                <?= $tour['description_long'] ?>
+        <?php if (!empty($tour['description_long'])): ?>
+            <div class="border-b border-gray-100 pb-8">
+                <h2 class="text-2xl font-bold mb-4 text-secondary">Descripción de la Experiencia</h2>
+                <div class="prose max-w-none text-gray-600 leading-relaxed">
+                    <?= $tour['description_long'] ?>
+                </div>
             </div>
-        </div>
+        <?php endif; ?>
 
         <!-- Nueva Sección Info Extendida -->
 
