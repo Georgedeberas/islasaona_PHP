@@ -48,17 +48,28 @@ class Tour
         'info_what_to_bring',
         'frequency_type',
         'specific_dates',
-        'price_rules'
+        'price_rules',
+        // Phase 4
+        'private_notes',
+        'sort_order',
+        'deleted_at'
     ];
 
-    public function getAll($activeOnly = true)
+    public function getAll($activeOnly = true, $includeDeleted = false)
     {
         $sql = "SELECT t.*, (SELECT image_path FROM tour_images WHERE tour_id = t.id AND is_cover = 1 LIMIT 1) as cover_image 
-                FROM tours t";
-        if ($activeOnly) {
-            $sql .= " WHERE is_active = 1";
+                FROM tours t WHERE 1=1";
+
+        if (!$includeDeleted) {
+            $sql .= " AND deleted_at IS NULL";
         }
-        $sql .= " ORDER BY created_at DESC";
+
+        if ($activeOnly) {
+            $sql .= " AND is_active = 1";
+        }
+
+        // Priority to manually ordered items
+        $sql .= " ORDER BY sort_order ASC, created_at DESC";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
@@ -116,10 +127,12 @@ class Tour
 
         $sql = "INSERT INTO tours (
                     title, slug, description_short, description_long, price_adult, price_child, duration, includes, not_included, display_style, is_active,
-                    seo_title, seo_description, keywords, schema_type, rating_score, review_count, tour_highlights, price_rules
+                    seo_title, seo_description, keywords, schema_type, rating_score, review_count, tour_highlights, price_rules,
+                    private_notes, sort_order
                 ) VALUES (
                     :title, :slug, :description_short, :description_long, :price_adult, :price_child, :duration, :includes, :not_included, :display_style, :is_active,
-                    :seo_title, :seo_description, :keywords, :schema_type, :rating_score, :review_count, :tour_highlights, :price_rules
+                    :seo_title, :seo_description, :keywords, :schema_type, :rating_score, :review_count, :tour_highlights, :price_rules,
+                    :private_notes, :sort_order
                 )";
 
         $stmt = $this->db->prepare($sql);
@@ -144,7 +157,9 @@ class Tour
             ':rating_score' => $data['rating_score'] ?? 4.8,
             ':review_count' => $data['review_count'] ?? 0,
             ':tour_highlights' => is_array($data['tour_highlights'] ?? null) ? json_encode($data['tour_highlights']) : ($data['tour_highlights'] ?? '[]'),
-            ':price_rules' => $data['price_rules'] ?? null
+            ':price_rules' => $data['price_rules'] ?? null,
+            ':private_notes' => $data['private_notes'] ?? null,
+            ':sort_order' => $data['sort_order'] ?? 0
         ];
 
         if ($stmt->execute($params)) {
@@ -216,5 +231,40 @@ class Tour
         $stmt->bindValue(':image_path', $imagePath);
         $stmt->bindValue(':is_cover', $isCover);
         return $stmt->execute();
+    }
+
+    // --- Phase 4 Methods ---
+
+    public function softDelete($id)
+    {
+        $sql = "UPDATE tours SET deleted_at = NOW(), is_active = 0 WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([':id' => $id]);
+    }
+
+    public function restore($id)
+    {
+        $sql = "UPDATE tours SET deleted_at = NULL WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([':id' => $id]);
+    }
+
+    public function forceDelete($id)
+    {
+        $sql = "DELETE FROM tours WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([':id' => $id]);
+    }
+
+    public function updateField($id, $field, $value)
+    {
+        // Whitelist safe fields
+        $allowed = ['price_adult', 'price_child', 'title', 'is_active', 'sort_order', 'private_notes'];
+        if (!in_array($field, $allowed))
+            return false;
+
+        $sql = "UPDATE tours SET $field = :value WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([':value' => $value, ':id' => $id]);
     }
 }

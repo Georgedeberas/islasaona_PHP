@@ -94,6 +94,9 @@ class TourController
             'specific_dates' => !empty($_POST['specific_dates']) ? explode(',', $_POST['specific_dates']) : [],
             // Seasonal Pricing (JSON string from UI)
             'price_rules' => $_POST['price_rules'] ?? null,
+            // Phase 4
+            'private_notes' => $_POST['private_notes'] ?? '',
+            'sort_order' => $_POST['sort_order'] ?? 0,
 
             // SEO
             'seo_title' => $_POST['seo_title'] ?? '',
@@ -258,5 +261,93 @@ class TourController
         $text = preg_replace('~-+~', '-', $text);
         $text = strtolower($text);
         return empty($text) ? 'n-a' : $text;
+    }
+
+    // --- PHASE 4: ADMIN POWER TOOLS ---
+
+    public function trash()
+    {
+        AuthController::requireLogin();
+        $tourModel = new Tour();
+        // GetAll deleted only? We need to update getAll logic or filter manually
+        // Our getAll supports $includeDeleted. But we want ONLY deleted?
+        // Let's just fetch all including deleted, and filter in PHP for the trash view.
+        // Efficient enough for small catalogue.
+        $allTours = $tourModel->getAll(false, true);
+        $deletedTours = array_filter($allTours, function ($t) {
+            return !empty($t['deleted_at']);
+        });
+
+        require __DIR__ . '/../Views/admin/tours/trash.php';
+    }
+
+    public function moveToTrash($id)
+    {
+        AuthController::requireLogin();
+        $tourModel = new Tour();
+        if ($tourModel->softDelete($id)) {
+            header('Location: /admin/tours?trashed=1');
+        } else {
+            die("Error moving to trash");
+        }
+    }
+
+    public function restore($id)
+    {
+        AuthController::requireLogin();
+        $tourModel = new Tour();
+        if ($tourModel->restore($id)) {
+            header('Location: /admin/tours/trash?restored=1');
+        } else {
+            die("Error restoring");
+        }
+    }
+
+    public function destroy($id)
+    {
+        AuthController::requireLogin();
+        $tourModel = new Tour();
+        if ($tourModel->forceDelete($id)) {
+            header('Location: /admin/tours/trash?deleted=1');
+        } else {
+            die("Error deleting permanently");
+        }
+    }
+
+    public function quickUpdate()
+    {
+        AuthController::requireLogin();
+        header('Content-Type: application/json');
+
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        if (!$input || empty($input['id']) || empty($input['field'])) {
+            echo json_encode(['success' => false, 'message' => 'Invalid data']);
+            return;
+        }
+
+        $tourModel = new Tour();
+        $result = $tourModel->updateField($input['id'], $input['field'], $input['value']);
+
+        echo json_encode(['success' => $result]);
+    }
+
+    public function reorder()
+    {
+        AuthController::requireLogin();
+        header('Content-Type: application/json');
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (!$input || !is_array($input['order'])) {
+            echo json_encode(['success' => false]);
+            return;
+        }
+
+        $tourModel = new Tour();
+        foreach ($input['order'] as $position => $id) {
+            $tourModel->updateField($id, 'sort_order', $position);
+        }
+
+        echo json_encode(['success' => true]);
     }
 }
