@@ -266,7 +266,7 @@ require __DIR__ . '/../layout/header.php';
 
                 <?php if (!empty($tour['info_important'])): ?>
                     <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
-                        <h3 class="font-bold text-gray-800 mb-2">⚠️ Importante - Política de Cancelación Hoy y Siempre</h3>
+                        <h3 class="font-bold text-gray-800 mb-2">⚠️ Importante</h3>
                         <p class="text-gray-600 text-sm whitespace-pre-line"><?= htmlspecialchars($tour['info_important']) ?>
                         </p>
                     </div>
