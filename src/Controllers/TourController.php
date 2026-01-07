@@ -260,18 +260,27 @@ class TourController
     {
         if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
             $uploadDir = __DIR__ . '/../../public/assets/uploads/';
-            if (!is_dir($uploadDir))
-                mkdir($uploadDir, 0755, true);
 
             $tourModel = new Tour();
 
             foreach ($_FILES['images']['tmp_name'] as $key => $tmp) {
                 if ($_FILES['images']['error'][$key] === 0) {
-                    $ext = pathinfo($_FILES['images']['name'][$key], PATHINFO_EXTENSION);
-                    $name = 'tour_' . $tourId . '_' . uniqid() . '.' . $ext;
-                    if (move_uploaded_file($tmp, $uploadDir . $name)) {
+                    // Preparar array de archivo individual para el servicio
+                    $fileData = [
+                        'tmp_name' => $tmp,
+                        'name' => $_FILES['images']['name'][$key],
+                        'type' => $_FILES['images']['type'][$key],
+                        'error' => 0,
+                        'size' => $_FILES['images']['size'][$key]
+                    ];
+
+                    // Optimizar y Guardar (Resize a 1920px max, WebP 80%)
+                    // Retorna el nombre del archivo generado o false
+                    $fileName = \App\Services\ImageService::optimizeAndSave($fileData, $uploadDir);
+
+                    if ($fileName) {
                         $isCover = ($firstIsCover && $key === 0) ? 1 : 0;
-                        $tourModel->addImage($tourId, 'assets/uploads/' . $name, $isCover);
+                        $tourModel->addImage($tourId, 'assets/uploads/' . $fileName, $isCover);
                     }
                 }
             }
