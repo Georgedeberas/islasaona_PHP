@@ -50,7 +50,16 @@ class Tour
     {
         // Fallback para keywords si vienen vacias
         if (empty($data['keywords'])) {
-            $defaults = ["Isla Saona", "Saona Island", "excursiones en República Dominicana", "tours en República Dominicana", "experiencias en República Dominicana", "Punta Cana", "Bávaro"];
+            $defaults = [
+                "Isla Saona",
+                "Excursiones Saona",
+                "Tours Punta Cana",
+                "Saona Island VIP",
+                "Mochileros RD",
+                "Turismo República Dominicana",
+                "Playa Abanico",
+                "Canto de la Playa"
+            ];
             $data['keywords'] = implode(', ', $defaults);
         }
         // Fallback Schema Type

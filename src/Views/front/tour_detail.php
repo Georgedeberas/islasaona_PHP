@@ -96,8 +96,10 @@ require __DIR__ . '/../layout/header.php';
             $class = ($count == 1) ? 'col-span-2 row-span-2' : 'col-span-1 row-span-1 hidden md:block';
             if ($count > 5)
                 break;
-            // Generar Alt dinámico rico
-            $altText = $seoTitle . " - Foto " . $count . " - Turismo República Dominicana";
+            // Generar Alt dinámico según regla AEO 2026
+            $altText = !empty($img['description']) 
+                ? $img['description'] 
+                : $tour['title'] . " - Experiencia en República Dominicana foto " . $count;
             ?>
             <div class="<?= $class ?> relative h-full group">
                 <img src="/<?= $img['image_path'] ?>" alt="<?= htmlspecialchars($altText) ?>"

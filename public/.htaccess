@@ -8,5 +8,6 @@
     RewriteCond %{REQUEST_FILENAME} !-f
 
     # Redirigir todo lo demás a index.php
+    RewriteRule ^sitemap\.xml$ sitemap.php [L]
     RewriteRule ^(.+)$ index.php [QSA,L]
 </IfModule>
