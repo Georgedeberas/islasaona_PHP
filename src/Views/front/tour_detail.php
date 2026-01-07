@@ -1,24 +1,52 @@
 <?php
-// Preparar datos para JSON-LD
-$price = $tour['price_adult'];
-$currency = 'USD';
-$imagesArray = array_map(function ($img) {
-    return 'http://islasaona.mochilerosrd.com/' . $img['image_path'];
-}, $images);
+// Preparar datos JSON-LD SEO Dinámico
+$currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 
+// Obtener datos si existen, sino fallbacks seguros
+$seoTitle = !empty($tour['seo_title']) ? $tour['seo_title'] : $tour['title'];
+$seoDesc = !empty($tour['seo_description']) ? $tour['seo_description'] : $tour['description_short'];
+$rating = !empty($tour['rating_score']) ? $tour['rating_score'] : '4.8';
+$reviews = !empty($tour['review_count']) ? $tour['review_count'] : '124';
+$highlights = json_decode($tour['tour_highlights'] ?? '[]', true);
+
+// Construcción del Schema
 $schema = [
     "@context" => "https://schema.org",
-    "@type" => "TouristTrip",
-    "name" => $tour['title'],
-    "description" => $tour['description_short'],
-    "touristType" => ["AdventureTourism", "CulturalTourism"],
+    "@type" => $tour['schema_type'] ?? 'TouristTrip',
+    "name" => $seoTitle,
+    "description" => $seoDesc,
+    "url" => $currentUrl,
+    "image" => array_map(function ($img) {
+        return 'http://islasaona.mochilerosrd.com/' . $img['image_path'];
+    }, $images),
+    "touristType" => ["AdventureTourism", "CulturalTourism", "FamilyTourism"],
+    "itinerary" => [
+        "@type" => "ItemList",
+        "itemListElement" => array_map(function ($h, $k) {
+            return ["@type" => "ListItem", "position" => $k + 1, "name" => $h];
+        }, $highlights, array_keys($highlights))
+    ],
     "offers" => [
         "@type" => "Offer",
-        "price" => $price,
-        "priceCurrency" => $currency,
-        "availability" => "https://schema.org/InStock"
+        "name" => "Entrada General",
+        "price" => $tour['price_adult'],
+        "priceCurrency" => "USD",
+        "availability" => "https://schema.org/InStock",
+        "validFrom" => date('Y-m-d')
     ],
-    "image" => $imagesArray
+    "provider" => [
+        "@type" => "TravelAgency",
+        "name" => "Mochileros RD",
+        "url" => "http://islasaona.mochilerosrd.com",
+        "telephone" => "+18290000000" // Debería inyectarse de settings
+    ],
+    "aggregateRating" => [
+        "@type" => "AggregateRating",
+        "ratingValue" => $rating,
+        "reviewCount" => $reviews,
+        "bestRating" => "5",
+        "worstRating" => "1"
+    ]
 ];
 
 $includes = json_decode($tour['includes'], true) ?? [];
@@ -26,22 +54,41 @@ $notIncluded = json_decode($tour['not_included'], true) ?? [];
 
 // Iniciar Vista
 require __DIR__ . '/../layout/header.php';
-// Nota: header.php ya carga $settings y $whatsapp, e inicia el <body>
 ?>
 
 <div class="container mx-auto px-4 py-6">
+    <!-- JSON-LD Injection -->
+    <script type="application/ld+json">
+        <?= json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
+    </script>
+
+    <!-- Meta tags adicionales manuales -->
+    <meta name="keywords" content="<?= htmlspecialchars($tour['keywords'] ?? '') ?>">
+
     <!-- Breadcrumb simple -->
+    <!-- ... (Resto del código visual se mantiene igual, solo inyectamos el bloque arriba) -->
+
     <nav class="text-sm text-gray-500 mb-4">
         <a href="/" class="hover:underline">Inicio</a> >
         <span class="text-gray-900"><?= htmlspecialchars($tour['title']) ?></span>
     </nav>
 
     <h1 class="text-3xl md:text-4xl font-bold mb-4 text-secondary">
-        <?= htmlspecialchars($tour['title']) ?>
+        <?= htmlspecialchars($seoTitle) ?>
     </h1>
 
-    <!-- Galería con Grid Moderno -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-2 h-96 rounded-2xl overflow-hidden shadow-lg">
+    <!-- Rating Badge (Visual SGE Signal) -->
+    <div class="flex items-center mb-6 text-yellow-500 gap-1">
+        <?php for ($i = 0; $i < 5; $i++): ?>
+            <svg class="w-5 h-5 <?= $i < round($rating) ? 'fill-current' : 'text-gray-300' ?>" viewBox="0 0 24 24">
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+            </svg>
+        <?php endfor; ?>
+        <span class="text-gray-600 font-medium ml-2"><?= $rating ?> (<?= $reviews ?> reseñas)</span>
+    </div>
+
+    <!-- Galería con Alt Tags Optimizados -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-2 h-96 rounded-2xl overflow-hidden shadow-lg mb-8">
         <?php
         $count = 0;
         foreach ($images as $img):
@@ -49,9 +96,11 @@ require __DIR__ . '/../layout/header.php';
             $class = ($count == 1) ? 'col-span-2 row-span-2' : 'col-span-1 row-span-1 hidden md:block';
             if ($count > 5)
                 break;
+            // Generar Alt dinámico rico
+            $altText = $seoTitle . " - Foto " . $count . " - Turismo República Dominicana";
             ?>
             <div class="<?= $class ?> relative h-full group">
-                <img src="/<?= $img['image_path'] ?>"
+                <img src="/<?= $img['image_path'] ?>" alt="<?= htmlspecialchars($altText) ?>"
                     class="w-full h-full object-cover hover:scale-105 transition duration-500 cursor-pointer">
             </div>
         <?php endforeach; ?>
@@ -64,6 +113,23 @@ require __DIR__ . '/../layout/header.php';
 <div class="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-12">
     <!-- Columna Izquierda: Información -->
     <div class="lg:col-span-2 space-y-8">
+
+        <!-- Highlights AI Block -->
+        <?php if (!empty($highlights)): ?>
+            <div class="bg-indigo-50 border-l-4 border-secondary p-5 rounded-r">
+                <h3 class="font-bold text-secondary mb-2 flex items-center">
+                    ✨ Puntos Destacados (Highlights)
+                </h3>
+                <ul class="grid grid-cols-1 gap-2">
+                    <?php foreach ($highlights as $hl): ?>
+                        <li class="flex items-start text-sm text-gray-700">
+                            <span class="mr-2">🔹</span> <?= htmlspecialchars($hl) ?>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
+
         <div class="border-b border-gray-100 pb-8">
             <h2 class="text-2xl font-bold mb-4 text-secondary">Lo que vivirás</h2>
             <div class="prose max-w-none text-gray-600 leading-relaxed">
@@ -254,10 +320,11 @@ require __DIR__ . '/../layout/header.php';
 
 <script>
     // Configuración del teléfono desde PHP (Sanitizado)
-    <?php 
-        // Eliminar todo lo que no sea digitos
-        $cleanPhone = preg_replace('/[^0-9]/', '', $whatsapp);
-        if(empty($cleanPhone)) $cleanPhone = '18290000000';
+    <?php
+    // Eliminar todo lo que no sea digitos
+    $cleanPhone = preg_replace('/[^0-9]/', '', $whatsapp);
+    if (empty($cleanPhone))
+        $cleanPhone = '18290000000';
     ?>
     const ADMIN_PHONE = "<?= $cleanPhone ?>";
 

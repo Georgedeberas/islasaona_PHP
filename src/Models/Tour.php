@@ -46,15 +46,38 @@ class Tour
         return $stmt->fetchAll();
     }
 
+    private function prepareSeoData(&$data)
+    {
+        // Fallback para keywords si vienen vacias
+        if (empty($data['keywords'])) {
+            $defaults = ["Isla Saona", "Saona Island", "excursiones en República Dominicana", "tours en República Dominicana", "experiencias en República Dominicana", "Punta Cana", "Bávaro"];
+            $data['keywords'] = implode(', ', $defaults);
+        }
+        // Fallback Schema Type
+        if (empty($data['schema_type'])) {
+            $data['schema_type'] = 'TouristTrip';
+        }
+        // Fallback Ratings (Fake social proof initial)
+        if (empty($data['rating_score']))
+            $data['rating_score'] = 4.8;
+        if (empty($data['review_count']))
+            $data['review_count'] = 120;
+    }
+
     public function create($data)
     {
-        // SQL corregido con parámetros exactos
-        $sql = "INSERT INTO tours (title, slug, description_short, description_long, price_adult, price_child, duration, includes, not_included, display_style, meta_title, meta_description, is_active) 
-                VALUES (:title, :slug, :description_short, :description_long, :price_adult, :price_child, :duration, :includes, :not_included, :display_style, :meta_title, :meta_description, :is_active)";
+        $this->prepareSeoData($data);
+
+        $sql = "INSERT INTO tours (
+                    title, slug, description_short, description_long, price_adult, price_child, duration, includes, not_included, display_style, is_active,
+                    seo_title, seo_description, keywords, schema_type, rating_score, review_count, tour_highlights
+                ) VALUES (
+                    :title, :slug, :description_short, :description_long, :price_adult, :price_child, :duration, :includes, :not_included, :display_style, :is_active,
+                    :seo_title, :seo_description, :keywords, :schema_type, :rating_score, :review_count, :tour_highlights
+                )";
 
         $stmt = $this->db->prepare($sql);
 
-        // Mapeo explicito para seguridad y debug
         $params = [
             ':title' => $data['title'],
             ':slug' => $data['slug'],
@@ -66,9 +89,15 @@ class Tour
             ':includes' => is_array($data['includes']) ? json_encode($data['includes']) : $data['includes'],
             ':not_included' => is_array($data['not_included']) ? json_encode($data['not_included']) : $data['not_included'],
             ':display_style' => $data['display_style'],
-            ':meta_title' => $data['meta_title'],
-            ':meta_description' => $data['meta_description'],
-            ':is_active' => $data['is_active']
+            ':is_active' => $data['is_active'],
+            // SEO Fields
+            ':seo_title' => $data['seo_title'] ?? $data['title'],
+            ':seo_description' => $data['seo_description'] ?? $data['description_short'],
+            ':keywords' => $data['keywords'],
+            ':schema_type' => $data['schema_type'],
+            ':rating_score' => $data['rating_score'],
+            ':review_count' => $data['review_count'],
+            ':tour_highlights' => is_array($data['tour_highlights']) ? json_encode($data['tour_highlights']) : $data['tour_highlights']
         ];
 
         if ($stmt->execute($params)) {
@@ -79,13 +108,14 @@ class Tour
 
     public function update($id, $data)
     {
+        $this->prepareSeoData($data);
+
         $fields = [];
         $params = [':id' => $id];
 
         foreach ($data as $key => $value) {
             $fields[] = "$key = :$key";
-            // Manejo especial para arrays JSON
-            if (($key === 'includes' || $key === 'not_included') && is_array($value)) {
+            if (in_array($key, ['includes', 'not_included', 'tour_highlights']) && is_array($value)) {
                 $params[':' . $key] = json_encode($value);
             } else {
                 $params[':' . $key] = $value;

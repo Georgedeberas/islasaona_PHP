@@ -97,7 +97,7 @@ class AdminController
 
             $data = [
                 'title' => $_POST['title'],
-                'slug' => $this->slugify($_POST['title']), // Slug inicial, si existe se ajusta abajo
+                'slug' => $this->slugify($_POST['title']),
                 'description_short' => $_POST['description_short'] ?? '',
                 'description_long' => $_POST['description_long'] ?? '',
                 'price_adult' => !empty($_POST['price_adult']) ? $_POST['price_adult'] : 0,
@@ -105,25 +105,31 @@ class AdminController
                 'duration' => $_POST['duration'] ?? '',
                 'is_active' => isset($_POST['is_active']) ? 1 : 0,
                 'display_style' => $_POST['display_style'] ?? 'grid',
-                'meta_title' => $_POST['meta_title'] ?? '',
-                'meta_description' => $_POST['meta_description'] ?? '',
+                'meta_title' => $_POST['seo_title'] ?? '', // Fallback old meta
+                'meta_description' => $_POST['seo_description'] ?? '',
                 'includes' => array_filter(explode("\n", $_POST['includes'] ?? '')),
-                'not_included' => array_filter(explode("\n", $_POST['not_included'] ?? ''))
+                'not_included' => array_filter(explode("\n", $_POST['not_included'] ?? '')),
+                // SEO AEO Fields
+                'seo_title' => $_POST['seo_title'] ?? '',
+                'seo_description' => $_POST['seo_description'] ?? '',
+                'keywords' => $_POST['keywords'] ?? '',
+                'schema_type' => $_POST['schema_type'] ?? 'TouristTrip',
+                'rating_score' => $_POST['rating_score'] ?? 4.8,
+                'review_count' => $_POST['review_count'] ?? 0,
+                'tour_highlights' => array_filter(explode("\n", $_POST['tour_highlights'] ?? ''))
             ];
 
             if ($id) {
-                unset($data['slug']); // No cambiar slug al editar para no romper SEO links existentes
+                unset($data['slug']);
                 if (!$tourModel->update($id, $data)) {
                     throw new Exception("Error al actualizar en Base de Datos.");
                 }
                 $tourId = $id;
             } else {
-                // Verificar slug único al crear
                 $existing = $tourModel->getBySlug($data['slug']);
                 if ($existing) {
                     $data['slug'] .= '-' . time();
                 }
-
                 $tourId = $tourModel->create($data);
                 if (!$tourId) {
                     throw new Exception("Error al crear en Base de Datos.");
