@@ -67,6 +67,9 @@
                                             </span>
                                         </td>
                                         <td class="text-end pe-4">
+                                            <a href="/admin/tours/duplicate?id=<?= $tour['id'] ?>"
+                                                class="btn btn-sm btn-warning me-1" title="Duplicar Oferta"
+                                                onclick="return confirm('¿Crear una copia de este tour?');">📋</a>
                                             <a href="/tour/<?= $tour['slug'] ?>" target="_blank"
                                                 class="btn btn-sm btn-outline-info me-1" title="Ver en vivo">👁️</a>
                                             <a href="/admin/tours/edit?id=<?= $tour['id'] ?>"
