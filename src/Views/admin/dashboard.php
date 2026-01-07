@@ -65,25 +65,26 @@
             <div class="d-flex justify-content-between align-items-center mt-5 mb-4 border-bottom pb-2">
                 <h3 class="text-secondary mb-0">📊 Estadísticas de Tráfico</h3>
 
-                <!-- Filtros y Acciones -->
+                <!-- Filtros -->
                 <div class="d-flex gap-2">
-                    <form action="/admin/dashboard" method="GET" class="d-flex gap-2">
-                        <select name="month" class="form-select form-select-sm" onchange="this.form.submit()">
-                            <option value="30" <?= ($filter == 30) ? 'selected' : '' ?>>Últimos 30 Días</option>
-                            <?php foreach ($availableMonths as $m): ?>
-                                <option value="<?= $m ?>" <?= ($filter == $m) ? 'selected' : '' ?>>
-                                    📅 <?= date("F Y", strtotime($m . "-01")) ?>
-                                </option>
-                            <?php endforeach; ?>
+                    <form action="/admin/dashboard" method="GET" class="d-flex gap-2 align-items-center">
+                        <label class="text-sm text-gray-500 fw-bold me-2">Filtrar por:</label>
+                        <select name="month" class="form-select form-select-sm" style="min-width: 200px;"
+                            onchange="this.form.submit()">
+                            <optgroup label="Tiempo Real">
+                                <option value="1d" <?= ($filter === '1d') ? 'selected' : '' ?>>⏱️ Últimas 24 Horas</option>
+                                <option value="3d" <?= ($filter === '3d') ? 'selected' : '' ?>>📅 Últimos 3 Días</option>
+                                <option value="7d" <?= ($filter === '7d') ? 'selected' : '' ?>>📅 Última Semana</option>
+                                <option value="30" <?= ($filter == 30) ? 'selected' : '' ?>>📅 Últimos 30 Días</option>
+                            </optgroup>
+                            <optgroup label="Histórico Mensual">
+                                <?php foreach ($availableMonths as $m): ?>
+                                    <option value="<?= $m ?>" <?= ($filter == $m) ? 'selected' : '' ?>>
+                                        📂 <?= date("F Y", strtotime($m . "-01")) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </optgroup>
                         </select>
-                    </form>
-
-                    <form action="/admin/dashboard" method="POST"
-                        onsubmit="return confirm('¿Estás SEGURO de borrar TODAS las estadísticas históricas? Esta acción no se puede deshacer.');">
-                        <input type="hidden" name="reset_analytics" value="confirm">
-                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Resetear Estadísticas">
-                            🗑️ Reset
-                        </button>
                     </form>
                 </div>
             </div>

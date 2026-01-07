@@ -17,14 +17,8 @@ class AdminController
     public function dashboard()
     {
         try {
-            // Handle Reset Action
-            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reset_analytics'])) {
-                if ($_POST['reset_analytics'] === 'confirm') {
-                    \App\Services\Analytics::resetStats();
-                    header("Location: /admin/dashboard?reset=1");
-                    exit;
-                }
-            }
+            // Reset Logic Removed as per user request (security/data integrity)
+
 
             $tourModel = new Tour();
             $allTours = $tourModel->getAll(false);
