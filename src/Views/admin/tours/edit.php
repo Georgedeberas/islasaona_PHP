@@ -312,6 +312,11 @@ if (isset($_GET['success'])): ?>
     </form>
 </div>
 
+<!-- Floating AEO Status -->
+<div id="global-aeo-light" class="position-fixed bottom-0 end-0 m-3 p-3 rounded-pill shadow fw-bold text-white bg-secondary" style="z-index: 1060; font-size: 0.9rem;">
+    <i class="fas fa-traffic-light me-1"></i> AEO Check
+</div>
+
 <!-- Modal Smart Parser -->
 <div class="modal fade" id="parserModal" tabindex="-1">
   <div class="modal-dialog modal-xl">
@@ -322,20 +327,29 @@ if (isset($_GET['success'])): ?>
       </div>
       <div class="modal-body">
         <p class="small text-muted">Pega aquí el texto completo del tour. La IA detectará campos como COSTO, INCLUYE, FECHAS, etc.</p>
-        <textarea id="pasteArea" class="form-control font-monospace" rows="15" placeholder="Pega el texto aquí..."></textarea>
+        <textarea id="parserTextarea" class="form-control font-monospace" rows="15" placeholder="Pega el texto aquí..."></textarea>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-primary" onclick="runSmartParser()">🔮 Procesar y Llenar</button>
+        <button type="button" id="btnParseAction" class="btn btn-primary">🔮 Procesar y Llenar</button>
       </div>
     </div>
   </div>
 </div>
 
+<style>
+    .aeo-dot { width: 10px; height: 10px; display: inline-block; border-radius: 50%; background: #ccc; margin-left:8px; }
+    .aeo-good { background: #198754; box-shadow: 0 0 5px #198754; }
+    .aeo-warning { background: #ffc107; box-shadow: 0 0 5px #ffc107; }
+    .aeo-bad { background: #dc3545; box-shadow: 0 0 5px #dc3545; }
+</style>
+
 <!-- JS Logic -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/assets/js/admin_tour_wizard.js"></script>
 <script>
-    // Toggle Specific Dates
+    // Toggle Specific Dates (Legacy Inline)
     const freqSelect = document.getElementById('frequency_select');
     const dateContainer = document.getElementById('specific_dates_container');
     
@@ -352,116 +366,6 @@ if (isset($_GET['success'])): ?>
         freqSelect.addEventListener('change', toggleDates);
         toggleDates(); // Init
     }
-
-    // --- SMART PARSER ULTRA ROBUSTO (V3) ---
-    function normalizeText(str) {
-        if(!str) return "";
-        // 1. Normalizar caracteres Unicode (Negritas matemáticas, etc) a ASCII simple
-        // Esto convierte "𝐂𝐎𝐒𝐓𝐎" -> "COSTO"
-        return str.normalize("NFKC").trim().toUpperCase();
-    }
-
-    function runSmartParser() {
-        const rawText = document.getElementById('pasteArea').value;
-        if(!rawText) return;
-
-        // Mapa de Keywords (Normalizadas) -> ID del Input
-        // Usamos arrays para variantes. La clave es el identificador lógico.
-        const mappings = [
-            { id: 'input_cost', keys: ['COSTO', 'PRECIO', 'PRECIO:', 'COSTO:'] },
-            { id: 'input_duration', keys: ['DURACION', 'TIEMPO', 'DURACION:'] },
-            { id: 'input_dates', keys: ['FECHAS DISPONIBLES', 'FECHA', 'SALIDAS', 'DISPONIBILIDAD'] },
-            { id: 'input_includes', keys: ['INCLUYE', 'QUE INCLUYE', 'ESTE TOUR INCLUYE', '✅ INCLUYE'] },
-            { id: 'input_not_included', keys: ['NO INCLUYE', 'NO ESTA INCLUIDO', '❌ NO INCLUYE'] },
-            { id: 'input_visiting', keys: ['VISITAREMOS', 'LUGARES A VISITAR', 'ITINERARIO', '📍 VISITAREMOS'] },
-            { id: 'input_departure', keys: ['PUNTOS DE SALIDA', 'SALIDA', 'PUNTO DE ENCUENTRO', 'HORA DE SALIDA'] },
-            { id: 'input_parking', keys: ['PARQUEOS', 'PARQUEO', 'ESTACIONAMIENTO'] },
-            { id: 'input_important', keys: ['IMPORTANTE', 'NOTA', 'OBSERVACIONES', '⚠️ IMPORTANTE'] },
-            { id: 'input_what_to_bring', keys: ['QUE LLEVAR', 'RECOMENDACIONES', '🎒 QUE LLEVAR'] }
-        ];
-
-        const lines = rawText.split('\n');
-        let currentInputId = null;
-        let buffer = [];
-
-        lines.forEach(originalLine => {
-            const cleanLine = normalizeText(originalLine);
-            
-            // Intentar detectar si esta linea es un encabezado conocido
-            let matchedId = null;
-
-            // Heurística: Un encabezado suele ser corto (menos de 60 caracteres)
-            if (cleanLine.length < 60) {
-                for (let group of mappings) {
-                    for (let key of group.keys) {
-                        // Verificamos si la linea EMPIEZA con la keyword o es IGUAL (tras limpieza)
-                        // Quitamos : y espacios al final para comparar "COSTO:" con "COSTO"
-                        const pureLine = cleanLine.replace(/[:.\-]/g, '').trim(); 
-                        if (pureLine === key || cleanLine.startsWith(key)) {
-                            matchedId = group.id;
-                            break;
-                        }
-                    }
-                    if (matchedId) break;
-                }
-            }
-
-            if (matchedId) {
-                // Hemos encontrado un NUEVO encabezado.
-                // 1. Guardar lo que teníamos en el buffer en el input anterior
-                if (currentInputId && buffer.length > 0) {
-                    flushBuffer(currentInputId, buffer);
-                }
-                
-                // 2. Cambiar al nuevo input
-                currentInputId = matchedId;
-                buffer = []; 
-
-                // 3. Chequear si la misma línea tiene contenido (Ej: "Costo: $500")
-                // Si la línea es solo el header, no la guardamos. Si tiene contenido, guardamos el resto.
-                // Removemos el header de la linea original para guardar solo el valor.
-                // Pero es dificil saber exacto donde cortar. 
-                // Simple: Si la linea tiene ':', cortamos despues.
-                if (originalLine.includes(':')) {
-                    const parts = originalLine.split(':');
-                    if (parts.length > 1 && parts[1].trim().length > 0) {
-                        buffer.push(parts.slice(1).join(':').trim());
-                    }
-                }
-            } else {
-                // No es encabezado, es contenido del input actual
-                if (currentInputId) {
-                    // Solo agregar si no es línea vacía repetida
-                    if (originalLine.trim().length > 0) {
-                        buffer.push(originalLine.trim());
-                    }
-                }
-            }
-        });
-
-        // Flush final
-        if (currentInputId && buffer.length > 0) {
-            flushBuffer(currentInputId, buffer);
-        }
-
-        // Cerrar modal
-        const modalEl = document.getElementById('parserModal');
-        const modal = bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
-        
-        alert('✨ Texto procesado. Revisa los campos.');
-    }
-
-    function flushBuffer(id, lines) {
-        const el = document.getElementById(id);
-        if (el) {
-            el.value = lines.join('\n');
-            // Auto-resize si fuera necesario
-            el.style.height = 'auto';
-            el.style.height = (el.scrollHeight) + 'px';
-        }
-    }
 </script>
-
 </body>
 </html>
