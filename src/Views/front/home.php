@@ -26,7 +26,10 @@
                 class="bg-primary text-white px-8 py-3.5 rounded-full font-bold hover:bg-sky-600 transition shadow-lg transform hover:scale-105">
                 Ver Tours
             </a>
-            <a href="https://wa.me/18290000000"
+            <?php
+            $waLink = !empty($whatsapp) ? "https://wa.me/" . preg_replace('/[^0-9]/', '', $whatsapp) : "#";
+            ?>
+            <a href="<?= $waLink ?>"
                 class="bg-white/10 backdrop-blur-sm border border-white/30 text-white px-8 py-3.5 rounded-full font-bold hover:bg-white/20 transition shadow-lg">
                 Hablar con Asesor
             </a>
@@ -54,7 +57,7 @@
             <h4 class="text-xl font-bold text-gray-800 mb-2">¡Aventuras en camino!</h4>
             <p class="text-gray-500 mb-6">Estamos actualizando nuestro catálogo de excursiones para brindarte lo mejor.
                 Vuelve pronto.</p>
-            <a href="https://wa.me/18290000000"
+            <a href="<?= $waLink ?>"
                 class="inline-flex items-center text-primary font-semibold hover:text-sky-700 transition">
                 Preguntar por disponibilidad
                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,12 +70,34 @@
         <!-- GRID DE TOURS -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <?php foreach ($tours as $tour): ?>
+                <?php
+                // Lógica Robusta de Imagen (Ported from Tour Detail)
+                $coverPathRaw = $tour['main_image'] ?? $tour['cover_image'] ?? '';
+                $coverUrl = "https://placehold.co/600x400/e2e8f0/475569?text=" . urlencode($tour['title']);
+
+                if (!empty($coverPathRaw)) {
+                    if (filter_var($coverPathRaw, FILTER_VALIDATE_URL)) {
+                        $coverUrl = $coverPathRaw;
+                    } else {
+                        $cleanPath = ltrim($coverPathRaw, '/');
+                        $candidates = (strpos($cleanPath, 'assets/') === false)
+                            ? ['assets/uploads/' . $cleanPath, 'assets/images/' . $cleanPath, 'uploads/' . $cleanPath]
+                            : [$cleanPath];
+
+                        foreach ($candidates as $cand) {
+                            if (file_exists(__DIR__ . '/../../../public/' . $cand)) {
+                                $coverUrl = "/" . $cand;
+                                break;
+                            }
+                        }
+                    }
+                }
+                ?>
                 <div
                     class="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-2xl transition duration-300 border border-gray-100 flex flex-col h-full">
                     <!-- Imagen -->
                     <div class="relative overflow-hidden h-64">
-                        <img src="/<?= !empty($tour['cover_image']) ? $tour['cover_image'] : 'assets/placeholder.jpg' ?>"
-                            alt="<?= htmlspecialchars($tour['title']) ?>"
+                        <img src="<?= $coverUrl ?>" alt="<?= htmlspecialchars($tour['title']) ?>"
                             class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
                         <div
@@ -85,14 +110,15 @@
                     <div class="p-6 flex-grow flex flex-col">
                         <div class="mb-4">
                             <h4 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary transition">
-                                <?= htmlspecialchars($tour['title']) ?></h4>
+                                <?= htmlspecialchars($tour['title']) ?>
+                            </h4>
                             <div class="flex items-center gap-4 text-xs font-medium text-gray-500 uppercase tracking-wide">
                                 <span class="flex items-center gap-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
-                                    <?= $tour['duration'] ?>
+                                    <?= htmlspecialchars($tour['duration'] ?? 'N/A') ?>
                                 </span>
                                 <span class="flex items-center gap-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
