@@ -294,10 +294,14 @@ require __DIR__ . '/../layout/header.php';
                 </div>
             <?php endif; ?>
 
-            <!-- GALERIA (Grid Bottom) -->
+            <!-- GALERIA (Grid Bottom / Stories Mobile) -->
             <div class="pt-10 mt-10 border-t border-gray-100">
-                <h3 class="text-3xl font-bold text-gray-900 mb-6">📸 Galería de Fotos</h3>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                <h3 class="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+                    📸 Galería <span class="text-sm font-normal text-gray-500 ml-3 md:hidden">(Desliza para ver)</span>
+                </h3>
+                
+                <!-- Container: Flex on Mobile (Stories), Grid on Desktop -->
+                <div class="flex overflow-x-auto snap-x snap-mandatory gap-3 pb-4 md:grid md:grid-cols-3 lg:grid-cols-4 md:overflow-visible md:pb-0" style="scrollbar-width: none; -ms-overflow-style: none;">
                     <?php
                     $galleryImages = [];
                     foreach ($images as $index => $imgData) {
@@ -331,11 +335,17 @@ require __DIR__ . '/../layout/header.php';
                     ?>
 
                     <?php foreach ($galleryImages as $idx => $img): ?>
-                        <div class="aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition cursor-pointer group relative"
+                        <!-- Item: Full width on mobile, auto on desktop -->
+                        <div class="snap-center shrink-0 w-[85vw] md:w-auto aspect-[4/5] md:aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition cursor-pointer group relative"
                             onclick="openLightbox(<?= $idx ?>)">
                             <img src="<?= $img['src'] ?>" alt="<?= htmlspecialchars($img['alt']) ?>"
                                 class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
                             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition"></div>
+                            
+                            <!-- Mobile Hint -->
+                            <div class="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full md:hidden backdrop-blur-sm">
+                                <?= $idx + 1 ?> / <?= count($galleryImages) ?>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -509,8 +519,12 @@ require __DIR__ . '/../layout/header.php';
     $cleanPhone = preg_replace('/[^0-9]/', '', $whatsapp);
     if (empty($cleanPhone))
         $cleanPhone = '18290000000';
+
+    // Rastreo de Origen (Master Plan Item 5)
+    $origen = isset($_GET['origen']) ? preg_replace('/[^a-zA-Z0-9]/', '', $_GET['origen']) : '';
     ?>
     const ADMIN_PHONE = "<?= $cleanPhone ?>";
+    const TRAFFIC_SOURCE = "<?= $origen ?>";
 
     // LIGHTBOX LOGIC
     const galleryImages = <?= json_encode($galleryImages) ?>;
@@ -545,11 +559,11 @@ require __DIR__ . '/../layout/header.php';
     }
 
     // Teclado
-    document.addEven tListener('keydown', function (e) {
-        if (document.getElementById('lightboxModal').c lassList.contains('hidden')) return;
-    if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowRight') nextImage();
-    if (e.key === 'ArrowLeft') prevImage();
+    document.addEventListener('keydown', function (e) {
+        if (document.getElementById('lightboxModal').classList.contains('hidden')) return;
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowRight') nextImage();
+        if (e.key === 'ArrowLeft') prevImage();
     });
 
     // BOOKING MODAL LOGIC (Legacy)
@@ -575,6 +589,12 @@ require __DIR__ . '/../layout/header.php';
 
         let msg = `*¡Hola Mochileros RD!* 👋\nQuiero reservar:\n\n🌴 *Tour:* ${tour}\n👤 *Nombre:* ${name}\n📅 *Fecha:* ${date}\n👥 *Personas:* ${pax}\n`;
         if (pickup) msg += `📍 *Recogida:* ${pickup}\n`;
+
+        // Smart Tracking Injection
+        if (TRAFFIC_SOURCE) {
+            msg += `\n🔗 *Vengo desde:* ${TRAFFIC_SOURCE.toUpperCase()}\n`;
+        }
+
         msg += `\n¿Disponibilidad?`;
 
         const url = `https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(msg)}`;
