@@ -241,28 +241,66 @@ if (isset($_GET['success'])): ?>
             <div class="tab-pane fade" id="tab-seo">
                  <div class="alert alert-info">
                     <i class="fas fa-robot me-2"></i>
-                    <strong>Zona AEO:</strong> Optimiza para que la Inteligencia Artificial entienda tu tour.
+                    <strong>Zona AEO & Social:</strong> Optimiza para Google y redes sociales.
                  </div>
                  <div class="row">
                      <div class="col-md-6">
                         <div class="mb-3">
-                            <label class="form-label">SEO Title</label>
-                            <input type="text" name="seo_title" class="form-control" value="<?= htmlspecialchars($tour['seo_title'] ?? '') ?>">
+                            <label class="form-label">SEO Title (Título Social)</label>
+                            <input type="text" name="seo_title" id="seo_title" class="form-control" value="<?= htmlspecialchars($tour['seo_title'] ?? '') ?>" placeholder="Se usará el título principal si está vacío">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Meta Description</label>
-                            <textarea name="seo_description" class="form-control" rows="3"><?= htmlspecialchars($tour['seo_description'] ?? '') ?></textarea>
+                            <label class="form-label">Meta Description (Descripción Social)</label>
+                            <textarea name="seo_description" id="seo_description" class="form-control" rows="3" placeholder="Resumen atractivo para Google y WhatsApp"><?= htmlspecialchars($tour['seo_description'] ?? '') ?></textarea>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Keywords (Etiquetas)</label>
                              <textarea name="keywords" class="form-control" rows="2"><?= htmlspecialchars($tour['keywords'] ?? '') ?></textarea>
                         </div>
+                        <div class="mb-3">
+                            <label class="fw-bold">Highlights (Resumido para IA)</label>
+                            <textarea name="tour_highlights" class="form-control" rows="6"><?= isset($tour['tour_highlights']) ? implode("\n", json_decode($tour['tour_highlights'], true) ?? []) : '' ?></textarea>
+                            <small class="text-muted">Una frase por línea.</small>
+                        </div>
                      </div>
                      <div class="col-md-6">
-                         <div class="mb-3">
-                             <label class="fw-bold">Highlights (Resumido para IA)</label>
-                             <textarea name="tour_highlights" class="form-control" rows="6"><?= isset($tour['tour_highlights']) ? implode("\n", json_decode($tour['tour_highlights'], true) ?? []) : '' ?></textarea>
-                             <small>Una frase por línea.</small>
+                         <!-- OG Preview -->
+                         <div class="sticky-top" style="top: 100px; z-index: 1;">
+                             <label class="form-label fw-bold mb-2"><i class="fab fa-whatsapp text-success me-1"></i> Vista Previa Compartida</label>
+                             <div class="card shadow-sm" style="max-width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid #dadde1;">
+                                 <!-- Fake Image -->
+                                 <div class="bg-secondary d-flex align-items-center justify-content-center text-white position-relative" style="aspect-ratio: 1.91/1; overflow: hidden;" id="og-image-container">
+                                     <?php 
+                                        $coverImg = 'https://placehold.co/600x315/e2e8f0/475569?text=Portada';
+                                        if(!empty($tourImages)) {
+                                            foreach($tourImages as $ti) {
+                                                if($ti['is_cover']) {
+                                                    $coverImg = '/' . ltrim($ti['image_path'], '/');
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                     ?>
+                                     <img src="<?= $coverImg ?>" id="og-img-preview" class="w-100 h-100 object-fit-cover" style="opacity: 0.8;">
+                                     <div class="position-absolute bg-white rounded-circle p-2 shadow" style="opacity:0.8;">
+                                         <i class="fas fa-image text-secondary"></i>
+                                     </div>
+                                 </div>
+                                 
+                                 <!-- Content -->
+                                 <div class="p-3 bg-light" style="background: #f0f2f5;">
+                                     <div class="small text-uppercase text-secondary mb-1" style="font-size: 11px;">ISLASAONA.MOCHILEROSRD.COM</div>
+                                     <h6 class="fw-bold mb-1 text-dark" id="og-title-preview" style="font-family: Helvetica, Arial, sans-serif; line-height: 1.3;">
+                                         <?= !empty($tour['seo_title']) ? $tour['seo_title'] : ($tour['title'] ?? 'Título del Tour') ?>
+                                     </h6>
+                                     <p class="small text-secondary m-0 text-truncate" id="og-desc-preview" style="font-size: 13px;">
+                                         <?= !empty($tour['seo_description']) ? $tour['seo_description'] : 'Descripción breve que aparecerá al compartir...' ?>
+                                     </p>
+                                 </div>
+                             </div>
+                             <div class="mt-2 small text-muted text-center">
+                                 <i class="fas fa-info-circle"></i> Así se verá tu enlace en WhatsApp/Facebook.
+                             </div>
                          </div>
                      </div>
                  </div>
