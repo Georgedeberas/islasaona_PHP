@@ -59,6 +59,7 @@ class PageController
             $title = $_POST['title'] ?? '';
             $slug = $_POST['slug'] ?? '';
             $content = $_POST['content'] ?? '';
+            $order = intval($_POST['order_index'] ?? 0);
 
             // Simple slugify si viene vacio o limpiar
             if (empty($slug)) {
@@ -70,7 +71,7 @@ class PageController
             $pageModel = new Page();
             // Validar unico no implementado en detalle aqui, asumimos DB error si dup key
             try {
-                if ($pageModel->create($title, $slug, $content)) {
+                if ($pageModel->create($title, $slug, $content, $order)) {
                     header('Location: /admin/pages?saved=1');
                     exit;
                 }
@@ -110,11 +111,12 @@ class PageController
             $title = $_POST['title'];
             $slug = $_POST['slug'];
             $content = $_POST['content'];
+            $order = intval($_POST['order_index'] ?? 0);
 
             // Clean slug
             $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $slug)));
 
-            $pageModel->update($id, $title, $slug, $content);
+            $pageModel->update($id, $title, $slug, $content, $order);
             header('Location: /admin/pages?saved=1');
             exit;
         }

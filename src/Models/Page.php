@@ -16,7 +16,7 @@ class Page
 
     public function getAll()
     {
-        $sql = "SELECT * FROM pages ORDER BY title ASC";
+        $sql = "SELECT * FROM pages ORDER BY order_index ASC, title ASC";
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll();
     }
@@ -30,23 +30,25 @@ class Page
         return $stmt->fetch();
     }
 
-    public function create($title, $slug, $content)
+    public function create($title, $slug, $content, $order_index = 0)
     {
-        $sql = "INSERT INTO pages (title, slug, content) VALUES (:title, :slug, :content)";
+        $sql = "INSERT INTO pages (title, slug, content, order_index) VALUES (:title, :slug, :content, :order_index)";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':title', $title);
         $stmt->bindParam(':slug', $slug);
         $stmt->bindParam(':content', $content);
+        $stmt->bindParam(':order_index', $order_index);
         return $stmt->execute();
     }
 
-    public function update($id, $title, $slug, $content)
+    public function update($id, $title, $slug, $content, $order_index = 0)
     {
-        $sql = "UPDATE pages SET title = :title, slug = :slug, content = :content WHERE id = :id";
+        $sql = "UPDATE pages SET title = :title, slug = :slug, content = :content, order_index = :order_index WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':title', $title);
         $stmt->bindParam(':slug', $slug);
         $stmt->bindParam(':content', $content);
+        $stmt->bindParam(':order_index', $order_index);
         $stmt->bindParam(':id', $id);
         return $stmt->execute();
     }

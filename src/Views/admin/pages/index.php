@@ -36,7 +36,8 @@
                     <table class="table table-hover table-striped mb-0">
                         <thead class="table-dark">
                             <tr>
-                                <th class="ps-4">Página</th>
+                                <th class="ps-4">Orden</th>
+                                <th>Página</th>
                                 <th>Slug (URL)</th>
                                 <th>Última Actualización</th>
                                 <th class="text-end pe-4">Acciones</th>
@@ -45,7 +46,10 @@
                         <tbody>
                             <?php foreach ($pages as $page): ?>
                                 <tr class="align-middle">
-                                    <td class="ps-4 fw-bold">
+                                    <td class="ps-4 text-muted">
+                                        #<?= $page['order_index'] ?? 0 ?>
+                                    </td>
+                                    <td class="fw-bold">
                                         <?= htmlspecialchars($page['title']) ?>
                                     </td>
                                     <td><span class="badge bg-light text-dark font-monospace">/<?= $page['slug'] ?></span>
