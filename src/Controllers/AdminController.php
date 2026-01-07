@@ -95,20 +95,23 @@ class AdminController
                 throw new Exception("El título es obligatorio.");
             }
 
+            // Sanitización básica para arrays de líneas
+            $sanitizeLines = function ($input) {
+                return array_filter(array_map('trim', explode("\n", $input ?? '')));
+            };
+
             $data = [
                 'title' => $_POST['title'],
-                'slug' => $this->slugify($_POST['title']),
+                'slug' => $_POST['slug'] ?? $this->slugify($_POST['title']), // Permitir editar slug o generar
                 'description_short' => $_POST['description_short'] ?? '',
                 'description_long' => $_POST['description_long'] ?? '',
                 'price_adult' => !empty($_POST['price_adult']) ? $_POST['price_adult'] : 0,
                 'price_child' => !empty($_POST['price_child']) ? $_POST['price_child'] : 0,
                 'duration' => $_POST['duration'] ?? '',
                 'is_active' => isset($_POST['is_active']) ? 1 : 0,
-                'display_style' => $_POST['display_style'] ?? 'grid',
-                'meta_title' => $_POST['seo_title'] ?? '', // Fallback old meta
-                'meta_description' => $_POST['seo_description'] ?? '',
-                'includes' => array_filter(explode("\n", $_POST['includes'] ?? '')),
-                'not_included' => array_filter(explode("\n", $_POST['not_included'] ?? '')),
+                // Listas JSON
+                'includes' => $sanitizeLines($_POST['includes']),
+                'not_included' => $sanitizeLines($_POST['not_included']),
                 // SEO AEO Fields
                 'seo_title' => $_POST['seo_title'] ?? '',
                 'seo_description' => $_POST['seo_description'] ?? '',
@@ -116,16 +119,55 @@ class AdminController
                 'schema_type' => $_POST['schema_type'] ?? 'TouristTrip',
                 'rating_score' => $_POST['rating_score'] ?? 4.8,
                 'review_count' => $_POST['review_count'] ?? 0,
-                'tour_highlights' => array_filter(explode("\n", $_POST['tour_highlights'] ?? ''))
+                'tour_highlights' => $sanitizeLines($_POST['tour_highlights']),
+                // New Extended Fields (2026)
+                'info_cost' => $_POST['info_cost'] ?? '',
+                'info_dates_text' => $_POST['info_dates_text'] ?? '',
+                'info_duration' => $_POST['info_duration'] ?? '',
+                'info_includes' => $_POST['info_includes'] ?? '',
+                'info_visiting' => $_POST['info_visiting'] ?? '',
+                'info_not_included' => $_POST['info_not_included'] ?? '',
+                'info_departure' => $_POST['info_departure'] ?? '',
+                'info_parking' => $_POST['info_parking'] ?? '',
+                'info_important' => $_POST['info_important'] ?? '',
+                'info_what_to_bring' => $_POST['info_what_to_bring'] ?? '',
+                'frequency_type' => $_POST['frequency_type'] ?? 'daily',
+                'specific_dates' => !empty($_POST['specific_dates']) ? explode(',', $_POST['specific_dates']) : []
             ];
 
             if ($id) {
-                unset($data['slug']);
+                // Actualizar
                 if (!$tourModel->update($id, $data)) {
                     throw new Exception("Error al actualizar en Base de Datos.");
                 }
                 $tourId = $id;
+
+                // 2. Gestionar Borrado de Imágenes
+                if (isset($_POST['delete_images']) && is_array($_POST['delete_images'])) {
+                    // Nota: Aquí deberíamos borrar físicamente too, pero por seguridad MVP solo borramos registro o marcamos
+                    // Para V1.5 borramos registro DB, el archivo queda "huérfano" por seguridad hasta cleanup script
+                    foreach ($_POST['delete_images'] as $imgIdToDelete) {
+                        // $tourModel->deleteImage($imgIdToDelete); (Implementar método en Modelo si no existe)
+                        // Hack temporal: Query directa si el modelo no tiene deleteImage, o agregarlo.
+                        // Asumiremos que agregamos deleteImage al modelo o usamos raw query aquí por brevedad del ejemplo
+                        $db = \App\Config\Database::getConnection();
+                        $stmt = $db->prepare("DELETE FROM tour_images WHERE id = :id");
+                        $stmt->execute([':id' => $imgIdToDelete]);
+                    }
+                }
+
+                // 3. Gestionar Portada (Cover)
+                if (isset($_POST['cover_image'])) {
+                    $coverId = $_POST['cover_image'];
+                    $db = \App\Config\Database::getConnection();
+                    // Reset all
+                    $db->prepare("UPDATE tour_images SET is_cover = 0 WHERE tour_id = ?")->execute([$tourId]);
+                    // Set new
+                    $db->prepare("UPDATE tour_images SET is_cover = 1 WHERE id = ?")->execute([$coverId]);
+                }
+
             } else {
+                // Crear
                 $existing = $tourModel->getBySlug($data['slug']);
                 if ($existing) {
                     $data['slug'] .= '-' . time();
@@ -136,7 +178,7 @@ class AdminController
                 }
             }
 
-            // Manejo de Imágenes
+            // 4. Manejo de Nuevas Imágenes
             if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
                 $uploadDirRelative = '/assets/uploads/';
                 $uploadDirAbsolute = __DIR__ . '/../../public' . $uploadDirRelative;
@@ -147,40 +189,29 @@ class AdminController
 
                 foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
                     if ($_FILES['images']['error'][$key] === UPLOAD_ERR_OK) {
-                        // Validación estricta MIME Type
+                        // Validación MIME
                         $finfo = new \finfo(FILEINFO_MIME_TYPE);
                         $mime = $finfo->file($tmp_name);
                         $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
 
-                        if (!in_array($mime, $allowedMimes)) {
-                            continue; // Saltar archivos no válidos (o lanzar error)
-                        }
+                        if (!in_array($mime, $allowedMimes))
+                            continue;
 
-                        // Generar extensión segura basada en MIME real
-                        $ext = '';
-                        switch ($mime) {
-                            case 'image/jpeg':
-                                $ext = 'jpg';
-                                break;
-                            case 'image/png':
-                                $ext = 'png';
-                                break;
-                            case 'image/webp':
-                                $ext = 'webp';
-                                break;
-                        }
-
+                        $ext = ($mime === 'image/png') ? 'png' : (($mime === 'image/webp') ? 'webp' : 'jpg');
                         $newName = 'tour_' . $tourId . '_' . uniqid() . '.' . $ext;
+
                         if (move_uploaded_file($tmp_name, $uploadDirAbsolute . $newName)) {
                             $dbPath = 'assets/uploads/' . $newName;
-                            $isCover = ($key === 0 && !$id) ? 1 : 0;
+                            // Si es nuevo tour y es la primera foto, es cover automáticamente
+                            $isCover = (!$id && $key === 0) ? 1 : 0;
                             $tourModel->addImage($tourId, $dbPath, $isCover);
                         }
                     }
                 }
             }
 
-            header('Location: /admin/tours'); // Redirigir a listado de tours
+            // Redirección POST-Redirect-GET a la misma página de edición
+            header("Location: /admin/tours/edit/$tourId?success=1");
             exit;
 
         } catch (Exception $e) {
