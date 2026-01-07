@@ -18,6 +18,12 @@ $schema = [
     "url" => $currentUrl,
     "image" => array_map(function ($img) {
         $safePath = ltrim($img['image_path'], '/');
+        // Asegurar que estamos usando el directorio uploads
+        if (strpos($safePath, 'assets/uploads') === false && strpos($safePath, 'assets/images') === false) {
+            // Si el path no tiene la estructura, intentar forzar la correcta
+            $safePath = 'assets/uploads/' . basename($safePath);
+        }
+
         $physicalPath = realpath(__DIR__ . '/../../../public/' . $safePath);
 
         if (!$physicalPath || !file_exists($physicalPath)) {
