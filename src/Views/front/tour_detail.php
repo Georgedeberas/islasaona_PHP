@@ -72,34 +72,50 @@ require __DIR__ . '/../layout/header.php';
 <!-- ========================================== -->
 <div class="w-full h-[35vh] md:h-[50vh] relative bg-gray-200 group">
     <?php
-    // Logic for Main Image with Fallback
-    $coverPathRaw = $tour['main_image'] ?? '';
-    $coverUrl = "https://placehold.co/1200x600/e2e8f0/475569?text=" . urlencode($tour['title']); // Default Fallback
+    // ============================================================
+    // ADVANCED IMAGE AUTO-DISCOVERY & RECOVERY SYSTEM (7/1/2026)
+    // ============================================================
     
-    if (!empty($coverPathRaw)) {
-        // If it's an external URL
-        if (filter_var($coverPathRaw, FILTER_VALIDATE_URL)) {
-            $coverUrl = $coverPathRaw;
-        } else {
-            // It's a local file
-            $cleanPath = ltrim($coverPathRaw, '/');
-            // Try to guess the folder if missing
-            if (strpos($cleanPath, 'assets/') === false) {
-                $candidates = [
-                    'assets/uploads/' . $cleanPath,
-                    'assets/images/' . $cleanPath,
-                    'uploads/' . $cleanPath // Legacy support
-                ];
-            } else {
-                $candidates = [$cleanPath];
-            }
+    $coverUrl = "https://placehold.co/1200x600/e2e8f0/475569?text=" . urlencode($tour['title']); // Default
+    
+    // 1. Intentar usar la ruta guardada en DB
+    $dbPath = $tour['main_image'] ?? $tour['cover_image'] ?? '';
 
-            foreach ($candidates as $cand) {
-                // Check physical existence
-                if (file_exists(__DIR__ . '/../../../public/' . $cand)) {
-                    $coverUrl = "/" . $cand;
-                    break;
+    if (!empty($dbPath) && filter_var($dbPath, FILTER_VALIDATE_URL)) {
+        $coverUrl = $dbPath; // Es una URL externa válida
+    } else {
+        // 2. Búsqueda Inteligente en Sistema de Archivos Local
+        $found = false;
+
+        // Candidatos basados en lo que haya en DB (limpiando slashes)
+        $candidates = [];
+        if (!empty($dbPath)) {
+            $cleanName = basename($dbPath); // Si en DB dice 'assets/uploads/foto.jpg', buscamos solo 'foto.jpg'
+            $candidates[] = 'assets/uploads/' . $cleanName;
+            $candidates[] = 'assets/images/' . $cleanName;
+            $candidates[] = 'uploads/' . $cleanName;
+        }
+
+        // 3. AUTO-HEALING: Buscar imágenes huérfanas por ID de Tour dadas por el sistema admin
+        // Patrón común: "tour_{id}_"
+        $uploadDir = __DIR__ . '/../../../public/assets/uploads/';
+        if (is_dir($uploadDir)) {
+            $files = scandir($uploadDir);
+            foreach ($files as $file) {
+                if (strpos($file, 'tour_' . $tour['id'] . '_') === 0) {
+                    // Encontramos una imagen que pertenece a este tour por nombre!
+                    // Priorizamos la que sea jpg/png
+                    $candidates[] = 'assets/uploads/' . $file;
                 }
+            }
+        }
+
+        // Verificar existencia física
+        foreach ($candidates as $cand) {
+            if (file_exists(__DIR__ . '/../../../public/' . $cand)) {
+                $coverUrl = "/" . $cand;
+                $found = true;
+                break; // Usar la primera encontrada (prioridad DB, luego Auto-Heal)
             }
         }
     }
@@ -183,7 +199,8 @@ require __DIR__ . '/../layout/header.php';
                         <h3 class="text-xl font-bold mb-3 text-blue-900 flex items-center gap-2"><span>📍</span> Visitaremos
                         </h3>
                         <p class="text-gray-700 whitespace-pre-line leading-relaxed">
-                            <?= htmlspecialchars($tour['info_visiting']) ?></p>
+                            <?= htmlspecialchars($tour['info_visiting']) ?>
+                        </p>
                     </div>
                 <?php endif; ?>
 
@@ -193,7 +210,8 @@ require __DIR__ . '/../layout/header.php';
                         <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
                             <h4 class="font-bold text-gray-900 mb-2 flex items-center gap-2">🚐 Puntos de Salida</h4>
                             <p class="text-sm text-gray-600 whitespace-pre-line">
-                                <?= htmlspecialchars($tour['info_departure']) ?></p>
+                                <?= htmlspecialchars($tour['info_departure']) ?>
+                            </p>
                         </div>
                     <?php endif; ?>
 
@@ -201,7 +219,8 @@ require __DIR__ . '/../layout/header.php';
                         <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
                             <h4 class="font-bold text-gray-900 mb-2 flex items-center gap-2">📅 Fechas</h4>
                             <p class="text-sm text-gray-600 whitespace-pre-line">
-                                <?= htmlspecialchars($tour['info_dates_text']) ?></p>
+                                <?= htmlspecialchars($tour['info_dates_text']) ?>
+                            </p>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -219,7 +238,8 @@ require __DIR__ . '/../layout/header.php';
                     </h3>
                     <?php if (!empty($tour['info_includes'])): ?>
                         <div class="text-gray-700 text-sm whitespace-pre-line leading-relaxed">
-                            <?= htmlspecialchars($tour['info_includes']) ?></div>
+                            <?= htmlspecialchars($tour['info_includes']) ?>
+                        </div>
                     <?php else: ?>
                         <ul class="space-y-3">
                             <?php foreach ($includes as $inc): ?>
@@ -239,7 +259,8 @@ require __DIR__ . '/../layout/header.php';
                     </h3>
                     <?php if (!empty($tour['info_not_included'])): ?>
                         <div class="text-gray-600 text-sm whitespace-pre-line leading-relaxed">
-                            <?= htmlspecialchars($tour['info_not_included']) ?></div>
+                            <?= htmlspecialchars($tour['info_not_included']) ?>
+                        </div>
                     <?php else: ?>
                         <ul class="space-y-3">
                             <?php foreach ($notIncluded as $inc): ?>
@@ -266,7 +287,8 @@ require __DIR__ . '/../layout/header.php';
                         <div class="bg-gray-100 p-6 rounded-2xl border border-gray-200">
                             <h3 class="font-bold text-gray-800 mb-2">⚠️ Importante</h3>
                             <p class="text-gray-600 text-sm whitespace-pre-line">
-                                <?= htmlspecialchars($tour['info_important']) ?></p>
+                                <?= htmlspecialchars($tour['info_important']) ?>
+                            </p>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -516,18 +538,18 @@ require __DIR__ . '/../layout/header.php';
         updateLightboxImage();
     }
 
-     function updateLightboxImage() {
+    function updateLightboxImage() {
         if (galleryImages.length > 0) {
             document.getElementById('lightboxImg').src = galleryImages[currentImageIndex].src;
         }
     }
 
     // Teclado
-     document.addEven tListener('keydown', function (e) {
+    document.addEven tListener('keydown', function (e) {
         if (document.getElementById('lightboxModal').c lassList.contains('hidden')) return;
-        if  (e.key === 'Escape') closeLightbox();
-        if  (e.key === 'ArrowRight') nextImage();
-        if (e.key === 'ArrowLeft') prevImage();
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowRight') nextImage();
+    if (e.key === 'ArrowLeft') prevImage();
     });
 
     // BOOKING MODAL LOGIC (Legacy)
