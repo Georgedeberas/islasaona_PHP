@@ -18,6 +18,11 @@ $schema = [
     "url" => $currentUrl,
     "image" => array_map(function ($img) {
         $safePath = ltrim($img['image_path'], '/');
+        $physicalPath = realpath(__DIR__ . '/../../../public/' . $safePath);
+
+        if (!$physicalPath || !file_exists($physicalPath)) {
+            return "https://placehold.co/800x600/E5E7EB/1F2937?text=Foto+No+Disponible";
+        }
         return 'http://islasaona.mochilerosrd.com/' . $safePath;
     }, $images),
     "touristType" => ["AdventureTourism", "CulturalTourism", "FamilyTourism"],
@@ -97,8 +102,21 @@ require __DIR__ . '/../layout/header.php';
             $class = ($count == 1) ? 'col-span-2 row-span-2' : 'col-span-1 row-span-1 hidden md:block';
             if ($count > 5)
                 break;
-            // Sanitizar path de imagen para evitar doble slash // o rutas absolutas incorrectas
+
+            // Sanitizar path
             $safePath = ltrim($img['image_path'], '/');
+
+            // Verificar existencia física (Asumiendo que tour_detail.php está en src/Views/front)
+            // __DIR__ = .../src/Views/front
+            // Root = .../
+            // Public Image = .../public/$safePath
+            $physicalPath = realpath(__DIR__ . '/../../../public/' . $safePath);
+
+            // URL Final (Fallback si no existe archivo)
+            $imageUrl = "/$safePath";
+            if (!$physicalPath || !file_exists($physicalPath)) {
+                $imageUrl = "https://placehold.co/800x600/E5E7EB/1F2937?text=Foto+No+Disponible";
+            }
 
             // Generar Alt dinámico según regla AEO 2026
             $altText = !empty($img['description'])
@@ -106,7 +124,7 @@ require __DIR__ . '/../layout/header.php';
                 : $tour['title'] . " - Experiencia en República Dominicana foto " . $count;
             ?>
             <div class="<?= $class ?> relative h-full group">
-                <img src="/<?= $safePath ?>" alt="<?= htmlspecialchars($altText) ?>"
+                <img src="<?= $imageUrl ?>" alt="<?= htmlspecialchars($altText) ?>"
                     class="w-full h-full object-cover hover:scale-105 transition duration-500 cursor-pointer">
             </div>
         <?php endforeach; ?>
