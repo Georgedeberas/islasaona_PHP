@@ -61,8 +61,7 @@ class Tour
                 FROM tours t WHERE 1=1";
 
         if (!$includeDeleted) {
-            // EMERGENCY PATCH: Uncomment after migration confirms 'deleted_at' exists
-            // $sql .= " AND deleted_at IS NULL";
+            $sql .= " AND deleted_at IS NULL";
         }
 
         if ($activeOnly) {
