@@ -112,6 +112,12 @@ require __DIR__ . '/../layout/header.php';
             // Sanitizar path
             $safePath = ltrim($img['image_path'], '/');
 
+            // AUTOMATIC FIX: Si la DB tiene solo "foto.jpg", convertirlo a "assets/uploads/foto.jpg"
+            // Esto alinea la visualización con la carpeta real de uploads
+            if (strpos($safePath, 'assets') === false && strpos($safePath, '/') === false) {
+                $safePath = 'assets/uploads/' . $safePath;
+            }
+
             // Verificar existencia física (Asumiendo que tour_detail.php está en src/Views/front)
             // __DIR__ = .../src/Views/front
             // Root = .../
