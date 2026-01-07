@@ -36,17 +36,20 @@ class Analytics
             $visitorId = $_COOKIE[$visitorCookie];
         }
 
-        // 3. Geolocalización "Offline" (Marcadores de posición)
-        // Para implementar esto REALMENTE offline, se requiere la BD MaxMind GeoLite2 (.mmdb)
-        // y la librería 'geoip2/geoip2'.
-        // Por ahora, guardaremos NULL y permitiremos que un proceso posterior lo resuelva,
-        // o implementaremos una lógica básica si se instala la librería.
-        $countryCode = 'XX'; // Desconocido por defecto
+        // 3. Geolocalización
+        $countryCode = 'XX';
         $city = 'Unknown';
 
-        // Intentar headers de Cloudflare si existen (a veces el hosting los provee gratis)
+        // A. Intentar headers de Cloudflare (Priority 1)
         if (isset($_SERVER["HTTP_CF_IPCOUNTRY"])) {
             $countryCode = $_SERVER["HTTP_CF_IPCOUNTRY"];
+        }
+        // B. Intentar API Fallback (Priority 2)
+        else {
+            // Solo consultar API si no tenemos dato y la IP es pública
+            // Para evitar latencia excesiva en cada request, idealmente esto se cachearía en sesión
+            // Pero por simplicidad en este MVP, lo haremos on-fly con un timeout corto
+            $countryCode = self::resolveCountry($ip);
         }
 
         try {
@@ -58,8 +61,7 @@ class Analytics
             ");
             $stmt->execute([$ip, $visitorId, $pageUrl, $referrer, $userAgent, $countryCode, $city]);
         } catch (\Exception $e) {
-            // Silencioso: Si falla el tracking, no romper la página del usuario
-            // error_log("Analytics Error: " . $e->getMessage());
+            // Silencioso
         }
     }
 
