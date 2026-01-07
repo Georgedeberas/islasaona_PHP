@@ -113,22 +113,15 @@ require __DIR__ . '/../layout/header.php';
             $safePath = ltrim($img['image_path'], '/');
 
             // AUTOMATIC FIX: Si la DB tiene solo "foto.jpg", convertirlo a "assets/uploads/foto.jpg"
-            // Esto alinea la visualización con la carpeta real de uploads
             if (strpos($safePath, 'assets') === false && strpos($safePath, '/') === false) {
                 $safePath = 'assets/uploads/' . $safePath;
             }
 
-            // Verificar existencia física (Asumiendo que tour_detail.php está en src/Views/front)
-            // __DIR__ = .../src/Views/front
-            // Root = .../
-            // Public Image = .../public/$safePath
-            $physicalPath = realpath(__DIR__ . '/../../../public/' . $safePath);
-
-            // URL Final (Fallback si no existe archivo)
+            // Usar ruta relativa directa (Solución Definitiva iPage)
+            // No usamos file_exists server-side porque la estructura de carpetas en hosting compartido
+            // puede tener symlinks o roots complejos que realpath() no resuelve bien.
+            // Si el archivo está ahí (visto en sys_check), el navegador lo cargará.
             $imageUrl = "/$safePath";
-            if (!$physicalPath || !file_exists($physicalPath)) {
-                $imageUrl = "https://placehold.co/800x600/E5E7EB/1F2937?text=Foto+No+Disponible";
-            }
 
             // Generar Alt dinámico según regla AEO 2026
             $altText = !empty($img['description'])
