@@ -17,19 +17,31 @@ class AdminController
     public function dashboard()
     {
         try {
-            $tourModel = new Tour();
-            $allTours = $tourModel->getAll(false); // Traer todos, activos e inactivos
+            // Handle Reset Action
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reset_analytics'])) {
+                if ($_POST['reset_analytics'] === 'confirm') {
+                    \App\Services\Analytics::resetStats();
+                    header("Location: /admin/dashboard?reset=1");
+                    exit;
+                }
+            }
 
-            // Calcular estadísticas de Tours
+            $tourModel = new Tour();
+            $allTours = $tourModel->getAll(false);
+
+            // Tour Stats
             $stats = [
                 'total_tours' => count($allTours),
                 'active_tours' => count(array_filter($allTours, fn($t) => $t['is_active'] == 1)),
                 'inactive_tours' => count(array_filter($allTours, fn($t) => $t['is_active'] == 0)),
             ];
 
-            // Estadísticas de Tráfico (Analytics Service)
-            // Importante: Asegurarse de importar el namespace arriba o usar FQCN
-            $trafficStats = \App\Services\Analytics::getStats(30); // Últimos 30 días
+            // Analytics Filter
+            $filter = $_GET['month'] ?? 30; // Default 30 days
+            $trafficStats = \App\Services\Analytics::getStats($filter);
+
+            // Available Months for Dropdown
+            $availableMonths = \App\Services\Analytics::getAvailableMonths();
 
             require __DIR__ . '/../Views/admin/dashboard.php';
         } catch (Exception $e) {

@@ -62,7 +62,31 @@
             </div>
 
             <!-- Sección Analytics -->
-            <h3 class="mt-5 mb-4 text-secondary border-bottom pb-2">📊 Estadísticas de Tráfico (Últimos 30 días)</h3>
+            <div class="d-flex justify-content-between align-items-center mt-5 mb-4 border-bottom pb-2">
+                <h3 class="text-secondary mb-0">📊 Estadísticas de Tráfico</h3>
+
+                <!-- Filtros y Acciones -->
+                <div class="d-flex gap-2">
+                    <form action="/admin/dashboard" method="GET" class="d-flex gap-2">
+                        <select name="month" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="30" <?= ($filter == 30) ? 'selected' : '' ?>>Últimos 30 Días</option>
+                            <?php foreach ($availableMonths as $m): ?>
+                                <option value="<?= $m ?>" <?= ($filter == $m) ? 'selected' : '' ?>>
+                                    📅 <?= date("F Y", strtotime($m . "-01")) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </form>
+
+                    <form action="/admin/dashboard" method="POST"
+                        onsubmit="return confirm('¿Estás SEGURO de borrar TODAS las estadísticas históricas? Esta acción no se puede deshacer.');">
+                        <input type="hidden" name="reset_analytics" value="confirm">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Resetear Estadísticas">
+                            🗑️ Reset
+                        </button>
+                    </form>
+                </div>
+            </div>
 
             <div class="row g-4">
                 <div class="col-md-6 col-lg-3">
@@ -70,7 +94,10 @@
                         <div class="card-body">
                             <h6 class="text-muted text-uppercase small fw-bold">Visitas Totales</h6>
                             <h2 class="display-6 fw-bold text-primary mb-0">
-                                <?= number_format($trafficStats['total_visits']) ?></h2>
+                                <?= number_format($trafficStats['total_visits']) ?>
+                            </h2>
+                            <small
+                                class="text-muted"><?= is_numeric($filter) ? "Últimos $filter días" : "En $filter" ?></small>
                         </div>
                     </div>
                 </div>
@@ -79,7 +106,8 @@
                         <div class="card-body">
                             <h6 class="text-muted text-uppercase small fw-bold">Visitantes Únicos</h6>
                             <h2 class="display-6 fw-bold text-success mb-0">
-                                <?= number_format($trafficStats['unique_visitors']) ?></h2>
+                                <?= number_format($trafficStats['unique_visitors']) ?>
+                            </h2>
                         </div>
                     </div>
                 </div>
@@ -121,14 +149,16 @@
                             <?php else: ?>
                                 <?php foreach ($trafficStats['top_countries'] as $country): ?>
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <span>
-                                            <?php if ($country['country_code'] !== 'XX'): ?>
-                                                <img src="https://flagcdn.com/16x12/<?= strtolower($country['country_code']) ?>.png"
-                                                    alt="<?= $country['country_code'] ?>" class="me-2">
+                                        <span class="d-flex align-items-center">
+                                            <?php if ($country['country_code'] !== 'XX' && !empty($country['country_code'])): ?>
+                                                <img src="https://flagcdn.com/20x15/<?= strtolower($country['country_code']) ?>.png"
+                                                    alt="<?= $country['country_code'] ?>" class="me-2 shadow-sm border">
                                             <?php else: ?>
-                                                🏳️
+                                                <span class="me-2">🏳️</span>
                                             <?php endif; ?>
-                                            <?= htmlspecialchars($country['country_code']) ?>
+
+                                            <!-- Nombre completo o Código -->
+                                            <?= htmlspecialchars($country['country_name'] ?? $country['country_code']) ?>
                                         </span>
                                         <span class="badge bg-light text-dark rounded-pill border"><?= $country['visits'] ?>
                                             hits</span>

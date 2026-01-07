@@ -66,46 +66,125 @@ class Analytics
     /**
      * Obtener estadísticas generales para el Dashboard
      */
-    public static function getStats($days = 30)
+    /**
+     * Obtener meses disponibles para filtro (YYYY-MM)
+     */
+    public static function getAvailableMonths()
+    {
+        $db = Database::getConnection();
+        $stmt = $db->query("
+            SELECT DISTINCT DATE_FORMAT(created_at, '%Y-%m') as month_str 
+            FROM analytics_visits 
+            ORDER BY month_str DESC
+        ");
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    /**
+     * Obtener estadísticas filtradas (Últimos X días o Mes Específico)
+     * @param string|int $filter puede ser un entero (días) o string 'YYYY-MM'
+     */
+    public static function getStats($filter = 30)
     {
         $db = Database::getConnection();
         $stats = [];
+        $params = [];
 
-        // Total Visitas (Últimos X días)
-        $stmt = $db->prepare("SELECT COUNT(*) as total FROM analytics_visits WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)");
-        $stmt->execute([$days]);
+        // Construcción del WHERE dinámico
+        if (is_numeric($filter)) {
+            $where = "created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)";
+            $params[] = $filter;
+        } elseif (preg_match('/^\d{4}-\d{2}$/', $filter)) {
+            $where = "DATE_FORMAT(created_at, '%Y-%m') = ?";
+            $params[] = $filter;
+        } else {
+            // Default 30 days
+            $where = "created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
+        }
+
+        // Total Visitas
+        $stmt = $db->prepare("SELECT COUNT(*) as total FROM analytics_visits WHERE $where");
+        $stmt->execute($params);
         $stats['total_visits'] = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
         // Visitantes Únicos
-        $stmt = $db->prepare("SELECT COUNT(DISTINCT visitor_id) as unique_visitors FROM analytics_visits WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)");
-        $stmt->execute([$days]);
+        $stmt = $db->prepare("SELECT COUNT(DISTINCT visitor_id) as unique_visitors FROM analytics_visits WHERE $where");
+        $stmt->execute($params);
         $stats['unique_visitors'] = $stmt->fetch(PDO::FETCH_ASSOC)['unique_visitors'];
 
         // Top Páginas
         $stmt = $db->prepare("
             SELECT page_url, COUNT(*) as visits 
             FROM analytics_visits 
-            WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+            WHERE $where
             GROUP BY page_url 
             ORDER BY visits DESC 
             LIMIT 5
         ");
-        $stmt->execute([$days]);
+        $stmt->execute($params);
         $stats['top_pages'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Top Países
         $stmt = $db->prepare("
             SELECT country_code, COUNT(*) as visits 
             FROM analytics_visits 
-            WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+            WHERE $where
             GROUP BY country_code 
             ORDER BY visits DESC 
-            LIMIT 5
+            LIMIT 10
         ");
-        $stmt->execute([$days]);
-        $stats['top_countries'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->execute($params);
+        $rawCountries = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Enriquecer con nombres completos
+        $stats['top_countries'] = array_map(function ($c) {
+            $c['country_name'] = self::getCountryName($c['country_code']);
+            return $c;
+        }, $rawCountries);
 
         return $stats;
+    }
+
+    /**
+     * Resetear estadísticas (Truncate)
+     */
+    public static function resetStats()
+    {
+        $db = Database::getConnection();
+        return $db->exec("TRUNCATE TABLE analytics_visits");
+    }
+
+    /**
+     * Mapeo simple de códigos ISO a Nombres Español
+     */
+    public static function getCountryName($code)
+    {
+        if ($code == 'XX' || empty($code))
+            return 'Desconocido';
+
+        $map = [
+            'DO' => 'República Dominicana',
+            'US' => 'Estados Unidos',
+            'ES' => 'España',
+            'FR' => 'Francia',
+            'IT' => 'Italia',
+            'DE' => 'Alemania',
+            'CA' => 'Canadá',
+            'GB' => 'Reino Unido',
+            'CO' => 'Colombia',
+            'MX' => 'México',
+            'AR' => 'Argentina',
+            'CL' => 'Chile',
+            'PE' => 'Perú',
+            'BR' => 'Brasil',
+            'PR' => 'Puerto Rico',
+            'VE' => 'Venezuela',
+            'RU' => 'Rusia',
+            'NL' => 'Países Bajos',
+            'CH' => 'Suiza'
+        ];
+
+        return $map[$code] ?? $code;
     }
 
     private static function getIpAddress()
