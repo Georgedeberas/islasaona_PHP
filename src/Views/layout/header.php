@@ -44,38 +44,35 @@ $whatsapp = $settings['whatsapp_number'] ?? '';
     </script>
     <style>
         /* Clean Google Translate */
+        /* FORCE Hide Google Translate Banner */
+        .goog-te-banner-frame.skiptranslate,
         .goog-te-banner-frame {
             display: none !important;
         }
 
-        .goog-te-gadget-simple {
-            background-color: transparent !important;
-            border: none !important;
-            padding: 0 !important;
-            font-size: 14px !important;
-        }
-
-        .goog-te-gadget-simple .goog-te-menu-value {
-            color: #4b5563 !important;
-        }
-
-        .goog-te-gadget-simple .goog-te-menu-value span {
-            border-left: none !important;
-            color: #4b5563 !important;
-        }
-
-        .goog-te-gadget-icon {
-            display: none !important;
-        }
-
         body {
-            top: 0 !important;
+            top: 0px !important;
         }
 
         #google_translate_element {
-            display: inline-block;
+            display: none !important;
         }
     </style>
+
+    <script>
+        function toggleLangMenu() {
+            const menu = document.getElementById('langDropdown');
+            menu.classList.toggle('hidden');
+        }
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const btn = document.getElementById('langBtn');
+            const menu = document.getElementById('langDropdown');
+            if (btn && menu && !btn.contains(event.target) && !menu.contains(event.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
 </head>
 
 <body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
@@ -131,32 +128,34 @@ $whatsapp = $settings['whatsapp_number'] ?? '';
 
             <!-- Actions -->
             <div class="flex items-center space-x-3">
-                <!-- Custom Language Selector (Desktop & Mobile) -->
-                <div class="relative group z-50">
-                    <button id="langBtn"
-                        class="flex items-center space-x-1 focus:outline-none hover:opacity-80 transition">
+                <!-- Custom Language Selector (Click Toggle) -->
+                <div class="relative z-50">
+                    <button id="langBtn" onclick="toggleLangMenu()"
+                        class="flex items-center space-x-1 focus:outline-none hover:opacity-80 transition p-1 rounded-full hover:bg-gray-100">
                         <img id="currentFlag" src="https://flagcdn.com/w40/es.png" alt="Idioma"
-                            class="w-6 h-6 rounded-full object-cover border border-gray-200 shadow-sm">
+                            class="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm">
                         <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
                             </path>
                         </svg>
                     </button>
                     <!-- Dropdown -->
-                    <div
-                        class="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-xl border border-gray-100 hidden group-hover:block transition-all transform origin-top-right">
-                        <a href="javascript:void(0)" onclick="setLanguage('es')"
-                            class="flex items-center px-4 py-2 hover:bg-gray-50 transition first:rounded-t-lg">
-                            <img src="https://flagcdn.com/w40/es.png"
-                                class="w-5 h-5 mr-3 rounded-full border border-gray-100">
-                            <span class="text-sm font-medium text-gray-700">Español</span>
-                        </a>
-                        <a href="javascript:void(0)" onclick="setLanguage('en')"
-                            class="flex items-center px-4 py-2 hover:bg-gray-50 transition last:rounded-b-lg">
-                            <img src="https://flagcdn.com/w40/us.png"
-                                class="w-5 h-5 mr-3 rounded-full border border-gray-100">
-                            <span class="text-sm font-medium text-gray-700">English</span>
-                        </a>
+                    <div id="langDropdown"
+                        class="hidden absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden transform origin-top-right transition-all">
+                        <div class="py-1">
+                            <a href="javascript:void(0)" onclick="setLanguage('es')"
+                                class="flex items-center px-4 py-3 hover:bg-orange-50 transition group">
+                                <img src="https://flagcdn.com/w40/es.png"
+                                    class="w-6 h-6 mr-3 rounded-full border border-gray-100 shadow-sm group-hover:scale-110 transition">
+                                <span class="text-sm font-bold text-gray-700 group-hover:text-primary">Español</span>
+                            </a>
+                            <a href="javascript:void(0)" onclick="setLanguage('en')"
+                                class="flex items-center px-4 py-3 hover:bg-blue-50 transition group">
+                                <img src="https://flagcdn.com/w40/us.png"
+                                    class="w-6 h-6 mr-3 rounded-full border border-gray-100 shadow-sm group-hover:scale-110 transition">
+                                <span class="text-sm font-bold text-gray-700 group-hover:text-secondary">English</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
