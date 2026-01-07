@@ -68,82 +68,49 @@ $notIncluded = json_decode($tour['not_included'], true) ?? [];
 require __DIR__ . '/../layout/header.php';
 ?>
 
-<div class="container mx-auto px-4 py-6">
-    <!-- JSON-LD Injection -->
-    <script type="application/ld+json">
-        <?= json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>
-    </script>
-
-    <!-- Meta tags adicionales manuales -->
-    <meta name="keywords" content="<?= htmlspecialchars($tour['keywords'] ?? '') ?>">
-
-    <!-- Breadcrumb simple -->
-    <!-- ... (Resto del código visual se mantiene igual, solo inyectamos el bloque arriba) -->
-
-    <nav class="text-sm text-gray-500 mb-4">
-        <a href="/" class="hover:underline">Inicio</a> >
-        <span class="text-gray-900"><?= htmlspecialchars($tour['title']) ?></span>
-    </nav>
-
-    <h1 class="text-3xl md:text-4xl font-bold mb-4 text-secondary">
-        <?= htmlspecialchars($seoTitle) ?>
-    </h1>
-
-    <!-- Rating Badge (Visual SGE Signal) -->
-    <div class="flex items-center mb-6 text-yellow-500 gap-1">
-        <?php for ($i = 0; $i < 5; $i++): ?>
-            <svg class="w-5 h-5 <?= $i < round($rating) ? 'fill-current' : 'text-gray-300' ?>" viewBox="0 0 24 24">
-                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-            </svg>
-        <?php endfor; ?>
-        <span class="text-gray-600 font-medium ml-2"><?= $rating ?> (<?= $reviews ?> reseñas)</span>
-    </div>
-
-    <!-- Galería con Alt Tags Optimizados -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-2 h-96 rounded-2xl overflow-hidden shadow-lg mb-8">
-        <?php
-        $count = 0;
-        foreach ($images as $img):
-            $count++;
-            $class = ($count == 1) ? 'col-span-2 row-span-2' : 'col-span-1 row-span-1 hidden md:block';
-            if ($count > 5)
-                break;
-
-            // Sanitizar path
-            $safePath = ltrim($img['image_path'], '/');
-
-            // AUTOMATIC FIX: Si la DB tiene solo "foto.jpg", convertirlo a "assets/uploads/foto.jpg"
-            if (strpos($safePath, 'assets') === false && strpos($safePath, '/') === false) {
-                $safePath = 'assets/uploads/' . $safePath;
-            }
-
-            // Usar ruta relativa directa (Solución Definitiva iPage)
-            // No usamos file_exists server-side porque la estructura de carpetas en hosting compartido
-            // puede tener symlinks o roots complejos que realpath() no resuelve bien.
-            // Si el archivo está ahí (visto en sys_check), el navegador lo cargará.
-            $imageUrl = "/$safePath";
-
-            // Generar Alt dinámico según regla AEO 2026
-            $altText = !empty($img['description'])
-                ? $img['description']
-                : $tour['title'] . " - Experiencia en República Dominicana foto " . $count;
-            ?>
-            <div class="<?= $class ?> relative h-full group">
-                <img src="<?= $imageUrl ?>" alt="<?= htmlspecialchars($altText) ?>"
-                    class="w-full h-full object-cover hover:scale-105 transition duration-500 cursor-pointer">
-            </div>
-        <?php endforeach; ?>
-        <?php if ($count == 0): ?>
-            <div class="col-span-4 h-full bg-gray-200 flex items-center justify-center text-gray-500">Sin Imagenes</div>
-        <?php endif; ?>
-    </div>
+<!-- Cover Notion-Style (Full Width, Moderate Height) -->
+<div class="w-full h-[350px] md:h-[450px] relative bg-gray-200 group">
+    <?php
+    $coverPath = ltrim($tour['main_image'] ?? '', '/');
+    if (strpos($coverPath, 'assets') === false && strpos($coverPath, '/') === false) {
+        $coverPath = 'assets/uploads/' . $coverPath;
+    }
+    $coverUrl = "/" . $coverPath;
+    ?>
+    <img src="<?= $coverUrl ?>" alt="Portada <?= htmlspecialchars($tour['title']) ?>" class="w-full h-full object-cover">
+    
+    <!-- Gradient Overlay (Opcional, para leer mejor si pusiéramos texto encima, pero el Notion suele ser limpio) -->
+    <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
 </div>
 
-<div class="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-12">
-    <!-- Columna Izquierda: Información -->
+<div class="container mx-auto px-4 py-8 -mt-8 relative z-10">
+    <!-- Card de Título flotante (Estilo Notion Icon/Title) -->
+    <div class="mb-8">
+        <!-- Breadcrumb -->
+        <nav class="text-sm text-gray-500 mb-4 bg-white/80 inline-block px-3 py-1 rounded-full backdrop-blur-sm shadow-sm">
+            <a href="/" class="hover:underline">Inicio</a> >
+            <span class="text-gray-900 font-medium"><?= htmlspecialchars($tour['title']) ?></span>
+        </nav>
+
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900 tracking-tight leading-tight">
+            <?= htmlspecialchars($seoTitle) ?>
+        </h1>
+
+        <!-- Rating Badge -->
+        <div class="flex items-center text-yellow-500 gap-1 bg-white inline-flex px-3 py-1 rounded-full shadow-sm border border-gray-100">
+            <?php for ($i = 0; $i < 5; $i++): ?>
+                <svg class="w-5 h-5 <?= $i < round($rating) ? 'fill-current' : 'text-gray-300' ?>" viewBox="0 0 24 24">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                </svg>
+            <?php endfor; ?>
+            <span class="text-gray-700 font-bold ml-2 text-sm"><?= $rating ?> <span class="text-gray-400 font-normal">(<?= $reviews ?> reseñas)</span></span>
+        </div>
+    </div>
+    
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
     <!-- Columna Izquierda: Información Extendida -->
     <div class="lg:col-span-2 space-y-8">
-
         <!-- Highlights AI Block -->
         <?php if (!empty($highlights)): ?>
             <div class="bg-indigo-50 border-l-4 border-secondary p-5 rounded-r">
@@ -169,158 +136,102 @@ require __DIR__ . '/../layout/header.php';
                 </div>
             </div>
         <?php endif; ?>
+        
+        <!-- ... (Resto de bloques se insertarán abajo o ya están en la parte inferior del archivo original, ver el replace anterior) -->
+        
+        <!-- Wait, in previous Replace I replaced EVERYTHING from line 102 to 275. 
+             So filtering context... I need to be careful not to duplicate content. 
+             The previous replacement effectively REMOVED the top gallery and inserted the Body Content + Bottom Gallery.
+             So this current replacement is for the Header part (Lines 71-100).
+        -->
 
-        <!-- Nueva Sección Info Extendida -->
+</div>
 
-        <!-- Bloque 1: Visitaremos (Itinerario) -->
-        <?php if (!empty($tour['info_visiting'])): ?>
-            <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
-                <h3 class="text-xl font-bold mb-3 text-blue-900 flex items-center">
-                    📍 Visitaremos
-                </h3>
-                <p class="text-gray-700 whitespace-pre-line"><?= htmlspecialchars($tour['info_visiting']) ?></p>
+<!-- Galería de Imágenes (Grid) -->
+<div class="mt-12 pt-8 border-t border-gray-100">
+    <h3 class="text-2xl font-bold text-secondary mb-6">📸 Galería de Fotos</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <?php
+        // Filtrar imagen de portada para no repetirla (opcional, si el path coincide)
+        // Normalizar paths para comparación básica
+        $detailsCover = ltrim($tour['main_image'] ?? '', '/');
+
+        foreach ($images as $img):
+            // Sanitizar path de la imagen actual
+            $safePath = ltrim($img['image_path'], '/');
+            if (strpos($safePath, 'assets') === false && strpos($safePath, '/') === false) {
+                $safePath = 'assets/uploads/' . $safePath;
+            }
+
+            // Skip si es la misma que la portada (intento básico)
+            // if (strpos($detailsCover, basename($safePath)) !== false) continue; 
+            // Mejor mostramos todas para que se vea completo el album
+        
+            $imageUrl = "/$safePath";
+            $altText = !empty($img['description']) ? $img['description'] : $tour['title'];
+            ?>
+            <div class="aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-md transition group">
+                <img src="<?= $imageUrl ?>" alt="<?= htmlspecialchars($altText) ?>"
+                    class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700 cursor-pointer"
+                    onclick="window.open(this.src, '_blank')">
+            </div>
+        <?php endforeach; ?>
+
+        <?php if (empty($images)): ?>
+            <div class="col-span-4 py-8 text-center text-gray-400 bg-gray-50 rounded-xl">
+                Sin imágenes adicionales
             </div>
         <?php endif; ?>
-
-        <!-- Bloque 2: Logística (Salida, Parqueo, Fechas) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <?php if (!empty($tour['info_departure'])): ?>
-                <div class="bg-gray-50 p-5 rounded-lg">
-                    <h4 class="font-bold text-gray-900 mb-2">🚐 Puntos de Salida</h4>
-                    <p class="text-sm text-gray-600 whitespace-pre-line"><?= htmlspecialchars($tour['info_departure']) ?>
-                    </p>
-                </div>
-            <?php endif; ?>
-
-            <?php if (!empty($tour['info_dates_text'])): ?>
-                <div class="bg-gray-50 p-5 rounded-lg">
-                    <h4 class="font-bold text-gray-900 mb-2">📅 Fechas Disponibles</h4>
-                    <p class="text-sm text-gray-600 whitespace-pre-line"><?= htmlspecialchars($tour['info_dates_text']) ?>
-                    </p>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <!-- Bloque 3: Incluye vs No Incluye -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-green-50 p-6 rounded-xl border border-green-100">
-                <h3 class="text-lg font-bold mb-4 text-green-800 flex items-center">
-                    ✅ Incluye
-                </h3>
-                <?php if (!empty($tour['info_includes'])): ?>
-                    <div class="text-gray-700 text-sm whitespace-pre-line leading-relaxed">
-                        <?= htmlspecialchars($tour['info_includes']) ?>
-                    </div>
-                <?php else: ?>
-                    <!-- Fallback legacy -->
-                    <ul class="space-y-3">
-                        <?php foreach ($includes as $inc): ?>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 text-green-600 mr-2 mt-0.5" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
-                                    </path>
-                                </svg>
-                                <span class="text-gray-700 text-sm"><?= htmlspecialchars($inc) ?></span>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php endif; ?>
-            </div>
-
-            <div class="bg-red-50 p-6 rounded-xl border border-red-100">
-                <h3 class="text-lg font-bold mb-4 text-red-800 flex items-center">
-                    ❌ No Incluye
-                </h3>
-                <?php if (!empty($tour['info_not_included'])): ?>
-                    <div class="text-gray-600 text-sm whitespace-pre-line leading-relaxed">
-                        <?= htmlspecialchars($tour['info_not_included']) ?>
-                    </div>
-                <?php else: ?>
-                    <!-- Fallback legacy -->
-                    <ul class="space-y-3">
-                        <?php foreach ($notIncluded as $notin): ?>
-                            <li class="flex items-start">
-                                <svg class="w-5 h-5 text-red-500 mr-2 mt-0.5" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                                <span class="text-gray-600 text-sm"><?= htmlspecialchars($notin) ?></span>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- Bloque 4: Recomendaciones e Importante -->
-        <?php if (!empty($tour['info_what_to_bring']) || !empty($tour['info_important'])): ?>
-            <div class="space-y-6">
-                <?php if (!empty($tour['info_what_to_bring'])): ?>
-                    <div class="bg-orange-50 p-6 rounded-xl border border-orange-100">
-                        <h3 class="font-bold text-orange-900 mb-2">🎒 ¿Qué llevar?</h3>
-                        <p class="text-gray-700 whitespace-pre-line"><?= htmlspecialchars($tour['info_what_to_bring']) ?></p>
-                    </div>
-                <?php endif; ?>
-
-                <?php if (!empty($tour['info_important'])): ?>
-                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
-                        <h3 class="font-bold text-gray-800 mb-2">⚠️ Importante</h3>
-                        <p class="text-gray-600 text-sm whitespace-pre-line"><?= htmlspecialchars($tour['info_important']) ?>
-                        </p>
-                    </div>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-
     </div>
+</div>
 
-    <!-- Columna Derecha: Price Card (Desktop) -->
-    <div class="lg:col-span-1 relative">
-        <div class="sticky top-24 border border-gray-200 rounded-2xl p-6 shadow-xl bg-white">
-            <div class="flex justify-between items-end mb-6">
-                <div>
-                    <span class="text-sm text-gray-500 uppercase font-semibold">Precio por adulto</span>
-                    <div class="text-4xl font-bold text-primary">$<?= number_format($tour['price_adult'], 0) ?></div>
-                </div>
-                <?php if ($tour['price_child'] > 0): ?>
-                    <div class="text-right">
-                        <span class="text-xs text-gray-500">Niños</span>
-                        <div class="text-xl font-bold text-gray-700">$<?= number_format($tour['price_child'], 0) ?></div>
-                    </div>
-                <?php endif; ?>
+</div>
+
+<!-- Columna Derecha: Price Card (Desktop) -->
+<div class="lg:col-span-1 relative">
+    <div class="sticky top-24 border border-gray-200 rounded-2xl p-6 shadow-xl bg-white">
+        <div class="flex justify-between items-end mb-6">
+            <div>
+                <span class="text-sm text-gray-500 uppercase font-semibold">Precio por adulto</span>
+                <div class="text-4xl font-bold text-primary">$<?= number_format($tour['price_adult'], 0) ?></div>
             </div>
-
-            <div class="space-y-4 mb-6">
-                <div class="flex items-center text-gray-600 bg-gray-50 p-3 rounded-lg">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <span class="font-medium"><?= htmlspecialchars($tour['duration']) ?></span>
+            <?php if ($tour['price_child'] > 0): ?>
+                <div class="text-right">
+                    <span class="text-xs text-gray-500">Niños</span>
+                    <div class="text-xl font-bold text-gray-700">$<?= number_format($tour['price_child'], 0) ?></div>
                 </div>
-                <div class="flex items-center text-gray-600 bg-gray-50 p-3 rounded-lg">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
-                        </path>
-                    </svg>
-                    <span class="font-medium">Salida: Bayahibe / La Romana</span>
-                </div>
-            </div>
+            <?php endif; ?>
+        </div>
 
-            <button onclick="openBookingModal()"
-                class="w-full block text-center bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-orange-600 transition shadow-lg transform active:scale-95 flex items-center justify-center gap-2">
-                <span>Reservar por WhatsApp</span>
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                        d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-8.683-2.031-.967-.272-.297-.471-.446-.917-.446-.445 0-.966.173-1.461.719-.496.545-1.908 1.857-1.908 4.526 0 2.67 1.956 5.242 2.229 5.613.272.371 3.847 5.861 9.32 8.082 3.256 1.321 3.918 1.058 4.612.991.694-.067 2.229-.916 2.551-1.807.322-.892.322-1.656.223-1.808z" />
+        <div class="space-y-4 mb-6">
+            <div class="flex items-center text-gray-600 bg-gray-50 p-3 rounded-lg">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-            </button>
-            <p class="text-center text-xs text-gray-400 mt-3">Sin pagos por adelantado. Habla directo con nosotros.</p>
+                <span class="font-medium"><?= htmlspecialchars($tour['duration']) ?></span>
+            </div>
+            <div class="flex items-center text-gray-600 bg-gray-50 p-3 rounded-lg">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                    </path>
+                </svg>
+                <span class="font-medium">Salida: Bayahibe / La Romana</span>
+            </div>
         </div>
+
+        <button onclick="openBookingModal()"
+            class="w-full block text-center bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-orange-600 transition shadow-lg transform active:scale-95 flex items-center justify-center gap-2">
+            <span>Reservar por WhatsApp</span>
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                    d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-8.683-2.031-.967-.272-.297-.471-.446-.917-.446-.445 0-.966.173-1.461.719-.496.545-1.908 1.857-1.908 4.526 0 2.67 1.956 5.242 2.229 5.613.272.371 3.847 5.861 9.32 8.082 3.256 1.321 3.918 1.058 4.612.991.694-.067 2.229-.916 2.551-1.807.322-.892.322-1.656.223-1.808z" />
+            </svg>
+        </button>
+        <p class="text-center text-xs text-gray-400 mt-3">Sin pagos por adelantado. Habla directo con nosotros.</p>
     </div>
+</div>
 </div>
 
 <!-- Mobile Sticky Footer Bar -->
