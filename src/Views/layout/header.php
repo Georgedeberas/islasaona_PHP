@@ -84,8 +84,7 @@ $whatsapp = $settings['whatsapp_number'] ?? '';
     <div class="bg-secondary text-white text-xs py-2">
         <div class="container mx-auto px-4 flex justify-between items-center">
             <div class="flex items-center space-x-4">
-                <!-- Lang Selector -->
-                <div id="google_translate_element"></div>
+                <!-- Clean Top Bar -->
 
                 <?php if ($phone): ?>
                     <span class="hidden sm:inline">📞 <?= htmlspecialchars($phone) ?></span>
@@ -132,6 +131,35 @@ $whatsapp = $settings['whatsapp_number'] ?? '';
 
             <!-- Actions -->
             <div class="flex items-center space-x-3">
+                <!-- Custom Language Selector (Desktop & Mobile) -->
+                <div class="relative group z-50">
+                    <button id="langBtn"
+                        class="flex items-center space-x-1 focus:outline-none hover:opacity-80 transition">
+                        <img id="currentFlag" src="https://flagcdn.com/w40/es.png" alt="Idioma"
+                            class="w-6 h-6 rounded-full object-cover border border-gray-200 shadow-sm">
+                        <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                            </path>
+                        </svg>
+                    </button>
+                    <!-- Dropdown -->
+                    <div
+                        class="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-xl border border-gray-100 hidden group-hover:block transition-all transform origin-top-right">
+                        <a href="javascript:void(0)" onclick="setLanguage('es')"
+                            class="flex items-center px-4 py-2 hover:bg-gray-50 transition first:rounded-t-lg">
+                            <img src="https://flagcdn.com/w40/es.png"
+                                class="w-5 h-5 mr-3 rounded-full border border-gray-100">
+                            <span class="text-sm font-medium text-gray-700">Español</span>
+                        </a>
+                        <a href="javascript:void(0)" onclick="setLanguage('en')"
+                            class="flex items-center px-4 py-2 hover:bg-gray-50 transition last:rounded-b-lg">
+                            <img src="https://flagcdn.com/w40/us.png"
+                                class="w-5 h-5 mr-3 rounded-full border border-gray-100">
+                            <span class="text-sm font-medium text-gray-700">English</span>
+                        </a>
+                    </div>
+                </div>
+
                 <?php if ($whatsapp): ?>
                     <a href="https://wa.me/<?= $whatsapp ?>"
                         class="inline-flex items-center bg-primary text-white px-5 py-2 rounded-full hover:bg-orange-600 transition shadow-md font-bold text-sm transform hover:scale-105">
@@ -148,17 +176,58 @@ $whatsapp = $settings['whatsapp_number'] ?? '';
             </div>
         </div>
 
-        <!-- Mobile Menu (DYNAMIC MENU) -->
+        <!-- Hidden Google Translate Element -->
+        <div id="google_translate_element" style="display:none;"></div>
+
+        <!-- Google Translate Logic -->
         <script type="text/javascript">
             function googleTranslateElementInit() {
-                console.log('Google Translate Init Started...');
                 new google.translate.TranslateElement({
                     pageLanguage: 'es',
-                    includedLanguages: 'en,fr,de,it,ru,pt',
-                    layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                    includedLanguages: 'en,es',
                     autoDisplay: false
                 }, 'google_translate_element');
             }
+
+            // Custom Language Logic
+            function setLanguage(lang) {
+                // Set cookie for Google Translate
+                // Format: googtrans=/source/dest
+                const cookieValue = `/es/${lang}`;
+                document.cookie = `googtrans=${cookieValue}; path=/; domain=${window.location.hostname}`;
+                document.cookie = `googtrans=${cookieValue}; path=/`; // Fallback
+
+                // Actualizar visualmente la bandera (opcional, pues se recarga)
+                updateFlag(lang);
+
+                // Reload to apply
+                window.location.reload();
+            }
+
+            function updateFlag(lang) {
+                const img = document.getElementById('currentFlag');
+                if (lang === 'en') {
+                    img.src = 'https://flagcdn.com/w40/us.png';
+                } else {
+                    img.src = 'https://flagcdn.com/w40/es.png';
+                }
+            }
+
+            // Detect current lang on load to set flag
+            document.addEventListener("DOMContentLoaded", function () {
+                const cookies = document.cookie.split(';');
+                let currentLang = 'es';
+
+                cookies.forEach(c => {
+                    if (c.trim().startsWith('googtrans=')) {
+                        const val = c.trim().split('=')[1];
+                        // val is like /es/en
+                        if (val.endsWith('/en')) currentLang = 'en';
+                    }
+                });
+
+                updateFlag(currentLang);
+            });
         </script>
         <script type="text/javascript"
             src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
