@@ -97,8 +97,18 @@ if (isset($_GET['success'])): ?>
                 </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-settings" type="button">
-                    ⚙️ Configuración
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-media" type="button">
+                    📸 Galería
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pricing" type="button">
+                    📅 Temporadas
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-seo" type="button">
+                    🚀 SEO & Social
                 </button>
             </li>
         </ul>
@@ -424,6 +434,83 @@ if (isset($_GET['success'])): ?>
     if(seoTitleInput) seoTitleInput.addEventListener('input', updatePreview);
     if(titleInput) titleInput.addEventListener('input', updatePreview);
     if(seoDescInput) seoDescInput.addEventListener('input', updatePreview);
+    // SEASONAL PRICING LOGIC
+    const priceRulesInput = document.getElementById('price_rules_input');
+    const rulesTable = document.getElementById('rules_table_body');
+    const noRulesMsg = document.getElementById('no-rules-msg');
+    
+    let priceRules = [];
+    try {
+        priceRules = JSON.parse(priceRulesInput?.value || '[]');
+    } catch(e) { priceRules = []; }
+
+    function renderRules() {
+        if(!rulesTable) return;
+        rulesTable.innerHTML = '';
+        
+        if(priceRules.length === 0) {
+            if(noRulesMsg) noRulesMsg.classList.remove('d-none');
+        } else {
+            if(noRulesMsg) noRulesMsg.classList.add('d-none');
+            
+            priceRules.forEach((rule, index) => {
+                const tr = document.createElement('tr');
+                let badge = 'badge bg-success';
+                let symbol = '$';
+                
+                tr.innerHTML = `
+                    <td class="align-middle">${rule.start}</td>
+                    <td class="align-middle">${rule.end}</td>
+                    <td class="align-middle"><span class="${badge}">+ ${rule.amount} ${symbol}</span></td>
+                    <td class="text-end">
+                        <button type="button" class="btn btn-outline-danger btn-sm py-0" onclick="removeRule(${index})">&times;</button>
+                    </td>
+                `;
+                rulesTable.appendChild(tr);
+            });
+        }
+        if(priceRulesInput) priceRulesInput.value = JSON.stringify(priceRules);
+    }
+
+    const btnAddRule = document.getElementById('btnAddRule');
+    if(btnAddRule) {
+        btnAddRule.addEventListener('click', () => {
+            const start = document.getElementById('rule_start').value;
+            const end = document.getElementById('rule_end').value;
+            const amount = document.getElementById('rule_amount').value;
+            
+            if(!start || !end || !amount) {
+                Swal.fire('Error', 'Completa todos los campos de la regla', 'error');
+                return;
+            }
+            
+            if(start > end) {
+                Swal.fire('Error', 'La fecha inicio no puede ser mayor que el fin', 'error');
+                return;
+            }
+
+            priceRules.push({
+                start: start,
+                end: end,
+                amount: amount,
+                type: 'fixed_add'
+            });
+            
+            renderRules();
+            
+            // Reset
+            document.getElementById('rule_start').value = '';
+            document.getElementById('rule_end').value = '';
+            document.getElementById('rule_amount').value = '';
+        });
+    }
+
+    window.removeRule = function(index) {
+        priceRules.splice(index, 1);
+        renderRules();
+    };
+
+    renderRules();
 </script>
 </body>
 </html>
