@@ -61,8 +61,7 @@ class Tour
                 FROM tours t WHERE 1=1";
 
         if (!$includeDeleted) {
-            // EMERGENCY PATCH 2: Keeping disabled until confirmed
-            // $sql .= " AND deleted_at IS NULL";
+            $sql .= " AND deleted_at IS NULL";
         }
 
         if ($activeOnly) {
