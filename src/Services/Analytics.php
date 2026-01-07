@@ -93,7 +93,13 @@ class Analytics
         $params = [];
 
         // Construcción del WHERE dinámico
-        if (is_numeric($filter)) {
+        if ($filter === '1d') {
+            $where = "created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)";
+        } elseif ($filter === '3d') {
+            $where = "created_at >= DATE_SUB(NOW(), INTERVAL 3 DAY)";
+        } elseif ($filter === '7d') {
+            $where = "created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
+        } elseif (is_numeric($filter)) {
             $where = "created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)";
             $params[] = $filter;
         } elseif (preg_match('/^\d{4}-\d{2}$/', $filter)) {
@@ -198,5 +204,26 @@ class Analytics
         } else {
             return $_SERVER['REMOTE_ADDR'];
         }
+    }
+    private static function resolveCountry($ip)
+    {
+        // Evitar llamar API para localhost
+        if ($ip == '127.0.0.1' || $ip == '::1')
+            return 'XX';
+
+        // Intentar geolocalización básica vía API pública (con timeout estricto para no frenar la carga)
+        try {
+            $ctx = stream_context_create(['http' => ['timeout' => 2]]); // 2 segundos max
+            $json = @file_get_contents("http://ip-api.com/json/{$ip}?fields=countryCode", false, $ctx);
+            if ($json) {
+                $data = json_decode($json, true);
+                if (isset($data['countryCode'])) {
+                    return $data['countryCode'];
+                }
+            }
+        } catch (\Exception $e) {
+            // Fallo silencioso
+        }
+        return 'XX';
     }
 }
