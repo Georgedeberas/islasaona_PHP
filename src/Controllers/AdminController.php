@@ -141,15 +141,34 @@ class AdminController
 
                 foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
                     if ($_FILES['images']['error'][$key] === UPLOAD_ERR_OK) {
-                        $name = basename($_FILES['images']['name'][$key]);
-                        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-                        if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
-                            $newName = 'tour_' . $tourId . '_' . uniqid() . '.' . $ext;
-                            if (move_uploaded_file($tmp_name, $uploadDirAbsolute . $newName)) {
-                                $dbPath = 'assets/uploads/' . $newName;
-                                $isCover = ($key === 0 && !$id) ? 1 : 0; // Primera imagen es cover si es nuevo
-                                $tourModel->addImage($tourId, $dbPath, $isCover);
-                            }
+                        // Validación estricta MIME Type
+                        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                        $mime = $finfo->file($tmp_name);
+                        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+
+                        if (!in_array($mime, $allowedMimes)) {
+                            continue; // Saltar archivos no válidos (o lanzar error)
+                        }
+
+                        // Generar extensión segura basada en MIME real
+                        $ext = '';
+                        switch ($mime) {
+                            case 'image/jpeg':
+                                $ext = 'jpg';
+                                break;
+                            case 'image/png':
+                                $ext = 'png';
+                                break;
+                            case 'image/webp':
+                                $ext = 'webp';
+                                break;
+                        }
+
+                        $newName = 'tour_' . $tourId . '_' . uniqid() . '.' . $ext;
+                        if (move_uploaded_file($tmp_name, $uploadDirAbsolute . $newName)) {
+                            $dbPath = 'assets/uploads/' . $newName;
+                            $isCover = ($key === 0 && !$id) ? 1 : 0;
+                            $tourModel->addImage($tourId, $dbPath, $isCover);
                         }
                     }
                 }
