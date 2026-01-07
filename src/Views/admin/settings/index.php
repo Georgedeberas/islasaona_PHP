@@ -31,6 +31,7 @@
 
                         <?php
                         $groups = [
+                            'Sistema' => ['maintenance_mode'],
                             'Contacto' => ['phone_main', 'whatsapp_number', 'email_contact', 'address'],
                             'Redes Sociales' => ['facebook_url', 'instagram_url', 'tiktok_url'],
                             'General' => ['company_name', 'footer_text']
@@ -52,7 +53,18 @@
                                     ?>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label fw-bold"><?= $s['label'] ?></label>
-                                        <?php if ($s['type'] === 'textarea'): ?>
+
+                                        <?php if ($key === 'maintenance_mode'): ?>
+                                            <select name="<?= $s['setting_key'] ?>"
+                                                class="form-select border-2 <?= $s['setting_value'] == '1' ? 'border-danger bg-danger-subtle text-danger' : 'border-success bg-success-subtle text-success' ?>">
+                                                <option value="0" <?= $s['setting_value'] == '0' ? 'selected' : '' ?>>🟢 Sitio Activo
+                                                    (Disponible al Público)</option>
+                                                <option value="1" <?= $s['setting_value'] == '1' ? 'selected' : '' ?>>🔴 Modo
+                                                    Mantenimiento (Solo Admins)</option>
+                                            </select>
+                                            <div class="form-text">Si activas esto, solo tú (logueado) podrás ver la web.</div>
+
+                                        <?php elseif ($s['type'] === 'textarea'): ?>
                                             <textarea name="<?= $s['setting_key'] ?>" class="form-control"
                                                 rows="3"><?= htmlspecialchars($s['setting_value']) ?></textarea>
                                         <?php else: ?>

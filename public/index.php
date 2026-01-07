@@ -8,6 +8,7 @@ error_reporting(E_ALL);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../error_log.php'); // Log local protegido
 
+session_start(); // Inicio de sesión global necesario para Auth y Mensajes Flash
 
 require_once __DIR__ . '/../src/autoload.php';
 
@@ -20,6 +21,20 @@ use App\Controllers\PageController;
 
 try {
     $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+    // --- FASE 5: MODO MANTENIMIENTO ---
+    // Verificar si no es admin area y si está activo
+    if (strpos($requestUri, '/admin') !== 0 && strpos($requestUri, '/login') === false) {
+        $dbMaint = \App\Config\Database::getConnection();
+        $stmtMaint = $dbMaint->query("SELECT setting_value FROM settings WHERE setting_key = 'maintenance_mode'");
+        $isMaintenance = $stmtMaint->fetchColumn();
+
+        if ($isMaintenance == '1' && empty($_SESSION['user_id'])) {
+            http_response_code(503);
+            require __DIR__ . '/../src/Views/front/maintenance.php';
+            exit;
+        }
+    }
 
     // Rutas Admin
     if (strpos($requestUri, '/admin') === 0) {
@@ -60,9 +75,19 @@ try {
         $tourController = new TourController();
         $tourController->detail($matches[1]);
     } else {
+        // --- FASE 5: REDIRECCIONES 301 ---
+        $path = trim($requestUri, '/');
+        $db = \App\Config\Database::getConnection();
+        $stmt = $db->prepare("SELECT new_url FROM redirects WHERE old_slug = ? LIMIT 1");
+        $stmt->execute([$path]);
+        if ($newUrl = $stmt->fetchColumn()) {
+            header("Location: " . $newUrl, true, 301);
+            exit;
+        }
+
         // Rutas dinámicas (slugs de páginas)
         // Intentar cargar como página estática si no matchea nada más
-        $slug = trim($requestUri, '/');
+        $slug = $path;
         // Sanitizar básico
         $slug = filter_var($slug, FILTER_SANITIZE_URL);
 
