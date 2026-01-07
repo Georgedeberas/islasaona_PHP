@@ -30,24 +30,28 @@ class Page
         return $stmt->fetch();
     }
 
-    public function create($title, $slug, $content, $order_index = 0)
+    public function create($title, $slug, $content, $template = 'classic', $meta_data = null, $order_index = 0)
     {
-        $sql = "INSERT INTO pages (title, slug, content, order_index) VALUES (:title, :slug, :content, :order_index)";
+        $sql = "INSERT INTO pages (title, slug, content, template, meta_data, order_index) VALUES (:title, :slug, :content, :template, :meta_data, :order_index)";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':title', $title);
         $stmt->bindParam(':slug', $slug);
         $stmt->bindParam(':content', $content);
+        $stmt->bindParam(':template', $template);
+        $stmt->bindParam(':meta_data', $meta_data);
         $stmt->bindParam(':order_index', $order_index);
         return $stmt->execute();
     }
 
-    public function update($id, $title, $slug, $content, $order_index = 0)
+    public function update($id, $title, $slug, $content, $template = 'classic', $meta_data = null, $order_index = 0)
     {
-        $sql = "UPDATE pages SET title = :title, slug = :slug, content = :content, order_index = :order_index WHERE id = :id";
+        $sql = "UPDATE pages SET title = :title, slug = :slug, content = :content, template = :template, meta_data = :meta_data, order_index = :order_index WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':title', $title);
         $stmt->bindParam(':slug', $slug);
         $stmt->bindParam(':content', $content);
+        $stmt->bindParam(':template', $template);
+        $stmt->bindParam(':meta_data', $meta_data);
         $stmt->bindParam(':order_index', $order_index);
         $stmt->bindParam(':id', $id);
         return $stmt->execute();

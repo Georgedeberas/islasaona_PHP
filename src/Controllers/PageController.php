@@ -21,24 +21,30 @@ class PageController
             return;
         }
 
-        $viewPath = __DIR__ . '/../Views/front/' . $slug . '.php';
-        if (file_exists($viewPath)) {
-            require $viewPath;
+        // 1. Prioridad: Vista específica por slug (ej: contact.php)
+        $overrideView = __DIR__ . '/../Views/front/' . $slug . '.php';
+        if (file_exists($overrideView)) {
+            require $overrideView;
             return;
         }
 
-        require __DIR__ . '/../Views/layout/header.php';
-        ?>
-        <div class="py-12 bg-gray-50">
-            <div class="container mx-auto px-4">
-                <h1 class="text-4xl font-bold text-center text-secondary mb-8"><?= htmlspecialchars($page['title']) ?></h1>
-                <div class="bg-white p-8 rounded-2xl shadow-sm prose max-w-none mx-auto lg:w-3/4">
-                    <?= $page['content'] ?>
-                </div>
-            </div>
-        </div>
-        <?php
-        require __DIR__ . '/../Views/layout/footer.php';
+        // 2. Sistema de Plantillas
+        $template = $page['template'] ?? 'classic';
+
+        // Sanitizar template para evitar directory traversal
+        $template = preg_replace('/[^a-z0-9_]/', '', $template);
+        if (empty($template))
+            $template = 'classic';
+
+        $templatePath = __DIR__ . '/../Views/front/pages/' . $template . '.php';
+
+        if (file_exists($templatePath)) {
+            require $templatePath;
+            return;
+        }
+
+        // 3. Fallback: Classic Template
+        require __DIR__ . '/../Views/front/pages/classic.php';
     }
 
     // ADMIN: LISTAR
@@ -60,6 +66,65 @@ class PageController
             $slug = $_POST['slug'] ?? '';
             $content = $_POST['content'] ?? '';
             $order = intval($_POST['order_index'] ?? 0);
+            $template = $_POST['template'] ?? 'classic';
+
+            // Recolectar Meta Data según plantilla
+            $metaData = [];
+
+            // 1. Landing Page Fields
+            if ($template === 'landing') {
+                $metaData['hero_title'] = $_POST['hero_title'] ?? '';
+                $metaData['hero_subtitle'] = $_POST['hero_subtitle'] ?? '';
+                $metaData['cta_text'] = $_POST['cta_text'] ?? '';
+                $metaData['cta_link'] = $_POST['cta_link'] ?? '';
+
+                // Features (simulated array from inputs)
+                $metaData['features'] = [];
+                if (isset($_POST['feature_title'])) {
+                    foreach ($_POST['feature_title'] as $k => $ft) {
+                        if (!empty($ft)) {
+                            $metaData['features'][] = [
+                                'title' => $ft,
+                                'desc' => $_POST['feature_desc'][$k] ?? '',
+                                'icon' => $_POST['feature_icon'][$k] ?? 'star'
+                            ];
+                        }
+                    }
+                }
+
+                // Hero Image Upload
+                if (isset($_FILES['hero_image']) && $_FILES['hero_image']['error'] === 0) {
+                    $upload = $this->handleFileUpload($_FILES['hero_image']);
+                    if ($upload)
+                        $metaData['hero_image'] = $upload;
+                }
+            }
+
+            // 2. Gallery Fields
+            if ($template === 'gallery') {
+                $metaData['gallery_description'] = $_POST['gallery_description'] ?? '';
+                // Multiple Uploads handled separately or via generic handler? 
+                // For MVP let's assume a simplified single-file flow or loop for gallery
+                if (isset($_FILES['gallery_photos'])) {
+                    $galleryPaths = [];
+                    foreach ($_FILES['gallery_photos']['tmp_name'] as $key => $tmp) {
+                        if ($_FILES['gallery_photos']['error'][$key] === 0) {
+                            // Manual construction for the helper
+                            $file = [
+                                'name' => $_FILES['gallery_photos']['name'][$key],
+                                'type' => $_FILES['gallery_photos']['type'][$key],
+                                'tmp_name' => $tmp,
+                                'error' => 0,
+                                'size' => $_FILES['gallery_photos']['size'][$key]
+                            ];
+                            $path = $this->handleFileUpload($file);
+                            if ($path)
+                                $galleryPaths[] = $path;
+                        }
+                    }
+                    $metaData['images'] = $galleryPaths;
+                }
+            }
 
             // Simple slugify si viene vacio o limpiar
             if (empty($slug)) {
@@ -69,9 +134,11 @@ class PageController
             }
 
             $pageModel = new Page();
-            // Validar unico no implementado en detalle aqui, asumimos DB error si dup key
             try {
-                if ($pageModel->create($title, $slug, $content, $order)) {
+                // Encode Meta
+                $metaJson = !empty($metaData) ? json_encode($metaData) : null;
+
+                if ($pageModel->create($title, $slug, $content, $template, $metaJson, $order)) {
                     header('Location: /admin/pages?saved=1');
                     exit;
                 }
@@ -81,6 +148,27 @@ class PageController
         }
 
         require __DIR__ . '/../Views/admin/pages/create.php';
+    }
+
+    private function handleFileUpload($file)
+    {
+        $uploadDirRelative = '/assets/uploads/pages/';
+        $uploadDirAbsolute = __DIR__ . '/../../public' . $uploadDirRelative;
+        if (!is_dir($uploadDirAbsolute))
+            mkdir($uploadDirAbsolute, 0755, true);
+
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($file['tmp_name']);
+        if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp']))
+            return null;
+
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $newName = 'page_' . uniqid() . '.' . $ext;
+
+        if (move_uploaded_file($file['tmp_name'], $uploadDirAbsolute . $newName)) {
+            return $uploadDirRelative . $newName;
+        }
+        return null;
     }
 
     // ADMIN: EDITAR
@@ -112,14 +200,84 @@ class PageController
             $slug = $_POST['slug'];
             $content = $_POST['content'];
             $order = intval($_POST['order_index'] ?? 0);
+            $template = $_POST['template'] ?? 'classic';
+
+            // Recolectar Meta Data
+            $currentMeta = json_decode($page['meta_data'] ?? '[]', true) ?? [];
+            $newMeta = [];
+
+            // 1. Landing Logic
+            if ($template === 'landing') {
+                $newMeta['hero_title'] = $_POST['hero_title'] ?? '';
+                $newMeta['hero_subtitle'] = $_POST['hero_subtitle'] ?? '';
+                $newMeta['cta_text'] = $_POST['cta_text'] ?? '';
+                $newMeta['cta_link'] = $_POST['cta_link'] ?? '';
+
+                // Features
+                $newMeta['features'] = [];
+                if (isset($_POST['feature_title'])) {
+                    foreach ($_POST['feature_title'] as $k => $ft) {
+                        if (!empty($ft)) {
+                            $newMeta['features'][] = [
+                                'title' => $ft,
+                                'desc' => $_POST['feature_desc'][$k] ?? '',
+                                'icon' => $_POST['feature_icon'][$k] ?? 'star'
+                            ];
+                        }
+                    }
+                }
+
+                // Image Handling
+                if (isset($_FILES['hero_image']) && $_FILES['hero_image']['error'] === 0) {
+                    $upload = $this->handleFileUpload($_FILES['hero_image']);
+                    if ($upload)
+                        $newMeta['hero_image'] = $upload;
+                } else {
+                    // Keep existing if not uploaded
+                    $newMeta['hero_image'] = $currentMeta['hero_image'] ?? '';
+                }
+            }
+
+            // 2. Gallery Logic
+            if ($template === 'gallery') {
+                $newMeta['gallery_description'] = $_POST['gallery_description'] ?? '';
+
+                // Keep existing images
+                $newMeta['images'] = $currentMeta['images'] ?? [];
+
+                // Add new images
+                if (isset($_FILES['gallery_photos'])) {
+                    foreach ($_FILES['gallery_photos']['tmp_name'] as $key => $tmp) {
+                        if ($_FILES['gallery_photos']['error'][$key] === 0) {
+                            $file = [
+                                'name' => $_FILES['gallery_photos']['name'][$key],
+                                'type' => $_FILES['gallery_photos']['type'][$key],
+                                'tmp_name' => $tmp,
+                                'error' => 0,
+                                'size' => $_FILES['gallery_photos']['size'][$key]
+                            ];
+                            $path = $this->handleFileUpload($file);
+                            if ($path)
+                                $newMeta['images'][] = $path;
+                        }
+                    }
+                }
+
+                // Handle deletion of specific images (todo: add UI for this later)
+            }
 
             // Clean slug
             $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $slug)));
 
-            $pageModel->update($id, $title, $slug, $content, $order);
+            $metaJson = !empty($newMeta) ? json_encode($newMeta) : null;
+
+            $pageModel->update($id, $title, $slug, $content, $template, $metaJson, $order);
             header('Location: /admin/pages?saved=1');
             exit;
         }
+
+        // Decode meta for view
+        $page['meta_data'] = json_decode($page['meta_data'] ?? '[]', true);
 
         require __DIR__ . '/../Views/admin/pages/edit.php';
     }
