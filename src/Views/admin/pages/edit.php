@@ -246,57 +246,17 @@
         </div>
     </div>
 
-    <!-- Modal Preview -->
-    <div class="modal fade" id="previewModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Vista Previa de Estructura</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center bg-dark">
-                    <img id="previewImage" src="" class="img-fluid rounded border" style="max-height: 80vh;">
-                </div>
-            </div>
-        </div>
-    </div>
-
     <style>
-        .cursor-pointer {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .template-option:hover {
-            border-color: #0d6efd !important;
-            background-color: #f8f9fa !important;
-        }
-
-        .active-template {
-            border: 2px solid #0d6efd !important;
-            background-color: #e7f1ff !important;
-        }
+        .cursor-pointer { cursor: pointer; transition: all 0.2s; }
+        .template-option:hover { border-color: #0d6efd !important; background-color: #f8f9fa !important; }
+        .active-template { border: 2px solid #0d6efd !important; background-color: #e7f1ff !important; }
     </style>
 
-    <script>
-        function selectTemplate(templateName, element) {
-            document.getElementById('selectedTemplate').value = templateName;
-            document.querySelectorAll('.template-option').forEach(el => el.classList.remove('active-template'));
-            element.classList.add('active-template');
-            document.querySelectorAll('.template-section').forEach(el => el.classList.add('d-none'));
-            document.getElementById('section-' + templateName).classList.remove('d-none');
-        }
-
-        function showPreview(template) {
-            const img = '/assets/img/templates/preview_' + template + '.webp';
-            document.getElementById('previewImage').src = img;
-            new bootstrap.Modal(document.getElementById('previewModal')).show();
-        }
-    </script>
-    </div>
-    </div>
-
+    <!-- External Libs -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Custom Admin UI -->
+    <script src="/assets/js/admin_ui.js"></script>
 </body>
-
 </html>

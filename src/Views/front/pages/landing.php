@@ -9,7 +9,7 @@ $meta = json_decode($page['meta_data'] ?? '[]', true);
     <!-- Hero Section -->
     <div class="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <?php
-        $heroImg = !empty($meta['hero_image']) ? $meta['hero_image'] : '/assets/img/placeholders/gray-landscape.webp';
+        $heroImg = !empty($meta['hero_image']) ? $meta['hero_image'] : '/assets/img/placeholders/gray-landscape.png';
         ?>
         <div class="absolute inset-0 z-0">
             <img src="<?= $heroImg ?>" class="w-full h-full object-cover">

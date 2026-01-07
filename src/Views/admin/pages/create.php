@@ -239,30 +239,12 @@
         }
     </style>
 
-    <script>
-        function selectTemplate(templateName, element) {
-            // Update hidden input
-            document.getElementById('selectedTemplate').value = templateName;
-
-            // Update visual state of cards
-            document.querySelectorAll('.template-option').forEach(el => el.classList.remove('active-template'));
-            element.classList.add('active-template');
-
-            // Update Badge
-            const labels = { 'classic': 'Clásica', 'landing': 'Landing Page', 'gallery': 'Galería Visual' };
-            document.getElementById('currentTemplateBadge').textContent = labels[templateName];
-
-            // Hide all sections
-            document.querySelectorAll('.template-section').forEach(el => el.classList.add('d-none'));
-
-            // Show selected section
-            document.getElementById('section-' + templateName).classList.remove('d-none');
-        }
-    </script>
-    </div>
-    </div>
-
+    <!-- External Libs -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Custom Admin UI -->
+    <script src="/assets/js/admin_ui.js"></script>
 </body>
 
 </html>

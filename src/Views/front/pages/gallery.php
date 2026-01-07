@@ -40,12 +40,12 @@ $meta = json_decode($page['meta_data'] ?? '[]', true);
                 class="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 opacity-50 grayscale hover:grayscale-0 transition duration-500">
                 <?php
                 $placeholders = [
-                    '/assets/img/placeholders/gray-landscape.webp',
-                    '/assets/img/placeholders/gray-square.webp',
-                    '/assets/img/placeholders/gray-landscape.webp',
-                    '/assets/img/placeholders/gray-square.webp',
-                    '/assets/img/placeholders/gray-landscape.webp',
-                    '/assets/img/placeholders/gray-square.webp'
+                    '/assets/img/placeholders/gray-landscape.png',
+                    '/assets/img/placeholders/gray-square.png',
+                    '/assets/img/placeholders/gray-landscape.png',
+                    '/assets/img/placeholders/gray-square.png',
+                    '/assets/img/placeholders/gray-landscape.png',
+                    '/assets/img/placeholders/gray-square.png'
                 ];
                 foreach ($placeholders as $img): ?>
                     <div class="break-inside-avoid relative group cursor-pointer overflow-hidden rounded-xl shadow-md">
