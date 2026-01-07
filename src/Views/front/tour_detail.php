@@ -67,23 +67,55 @@ require __DIR__ . '/../layout/header.php';
 <!-- ========================================== -->
 <!-- 1. NOTION STYLE HEADER (Full Width Strip)  -->
 <!-- ========================================== -->
+<!-- ========================================== -->
+<!-- 1. NOTION STYLE HEADER (Full Width Strip)  -->
+<!-- ========================================== -->
 <div class="w-full h-[35vh] md:h-[50vh] relative bg-gray-200 group">
     <?php
-    $coverPath = ltrim($tour['main_image'] ?? '', '/');
-    if (strpos($coverPath, 'assets') === false && strpos($coverPath, '/') === false) {
-        $coverPath = 'assets/uploads/' . $coverPath;
+    // Logic for Main Image with Fallback
+    $coverPathRaw = $tour['main_image'] ?? '';
+    $coverUrl = "https://placehold.co/1200x600/e2e8f0/475569?text=" . urlencode($tour['title']); // Default Fallback
+    
+    if (!empty($coverPathRaw)) {
+        // If it's an external URL
+        if (filter_var($coverPathRaw, FILTER_VALIDATE_URL)) {
+            $coverUrl = $coverPathRaw;
+        } else {
+            // It's a local file
+            $cleanPath = ltrim($coverPathRaw, '/');
+            // Try to guess the folder if missing
+            if (strpos($cleanPath, 'assets/') === false) {
+                $candidates = [
+                    'assets/uploads/' . $cleanPath,
+                    'assets/images/' . $cleanPath,
+                    'uploads/' . $cleanPath // Legacy support
+                ];
+            } else {
+                $candidates = [$cleanPath];
+            }
+
+            foreach ($candidates as $cand) {
+                // Check physical existence
+                if (file_exists(__DIR__ . '/../../../public/' . $cand)) {
+                    $coverUrl = "/" . $cand;
+                    break;
+                }
+            }
+        }
     }
-    $coverUrl = "/" . $coverPath;
     ?>
     <img src="<?= $coverUrl ?>" alt="Portada <?= htmlspecialchars($tour['title']) ?>"
         class="w-full h-full object-cover">
-    <!-- Gradiente sutil para profundidad -->
+    <!-- Gradiente sutil -->
     <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
 </div>
 
-<div class="container mx-auto px-4 py-8 -mt-10 relative z-10">
+<div class="container mx-auto px-4 py-8 -mt-10 relative z-10"> <!-- z-10 OK for content -->
 
-    <!-- Título y Breadcrumbs (Estilo Tarjeta Elevada o Limpio) -->
+    <!-- ... (Title Section skipped in replacement - standard) ... -->
+    <!-- NB: Content replaced via StartLine logic below will include all this -->
+
+    <!-- Título y Breadcrumbs -->
     <div class="mb-10">
         <nav
             class="text-sm text-gray-700 mb-3 bg-white/90 backdrop-blur inline-block px-4 py-1.5 rounded-full shadow-sm border border-gray-100">
@@ -114,16 +146,12 @@ require __DIR__ . '/../layout/header.php';
 
     <!-- Layout Principal -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-
-        <!-- COLUMNA IZQUIERDA: CONTENIDO -->
+        <!-- COLUMNA IZQUIERDA -->
         <div class="lg:col-span-2 space-y-10">
-
             <!-- Highlights -->
             <?php if (!empty($highlights)): ?>
                 <div class="bg-indigo-50 border-l-4 border-primary p-6 rounded-r-xl">
-                    <h3 class="font-bold text-gray-900 mb-4 flex items-center text-lg">
-                        ✨ Lo más destacado
-                    </h3>
+                    <h3 class="font-bold text-gray-900 mb-4 flex items-center text-lg">✨ Lo más destacado</h3>
                     <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <?php foreach ($highlights as $hl): ?>
                             <li class="flex items-start text-gray-700">
@@ -152,8 +180,7 @@ require __DIR__ . '/../layout/header.php';
                 <!-- Visitaremos -->
                 <?php if (!empty($tour['info_visiting'])): ?>
                     <div class="bg-blue-50/50 p-6 rounded-2xl border border-blue-100/50 hover:border-blue-200 transition">
-                        <h3 class="text-xl font-bold mb-3 text-blue-900 flex items-center gap-2">
-                            <span>📍</span> Visitaremos
+                        <h3 class="text-xl font-bold mb-3 text-blue-900 flex items-center gap-2"><span>📍</span> Visitaremos
                         </h3>
                         <p class="text-gray-700 whitespace-pre-line leading-relaxed">
                             <?= htmlspecialchars($tour['info_visiting']) ?></p>
@@ -192,18 +219,16 @@ require __DIR__ . '/../layout/header.php';
                     </h3>
                     <?php if (!empty($tour['info_includes'])): ?>
                         <div class="text-gray-700 text-sm whitespace-pre-line leading-relaxed">
-                            <?= htmlspecialchars($tour['info_includes']) ?>
-                        </div>
+                            <?= htmlspecialchars($tour['info_includes']) ?></div>
                     <?php else: ?>
                         <ul class="space-y-3">
                             <?php foreach ($includes as $inc): ?>
-                                <li class="flex items-start text-sm text-gray-700"><span class="mr-2 text-green-600">✓</span>
-                                    <?= htmlspecialchars($inc) ?></li>
+                                <li class="flex items-start text-sm text-gray-700"><span
+                                        class="mr-2 text-green-600">✓</span><?= htmlspecialchars($inc) ?></li>
                             <?php endforeach; ?>
                         </ul>
                     <?php endif; ?>
                 </div>
-
                 <div class="bg-red-50 p-6 rounded-2xl border border-red-100">
                     <h3 class="text-lg font-bold mb-4 text-red-800 flex items-center gap-2">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,13 +239,12 @@ require __DIR__ . '/../layout/header.php';
                     </h3>
                     <?php if (!empty($tour['info_not_included'])): ?>
                         <div class="text-gray-600 text-sm whitespace-pre-line leading-relaxed">
-                            <?= htmlspecialchars($tour['info_not_included']) ?>
-                        </div>
+                            <?= htmlspecialchars($tour['info_not_included']) ?></div>
                     <?php else: ?>
                         <ul class="space-y-3">
                             <?php foreach ($notIncluded as $inc): ?>
-                                <li class="flex items-start text-sm text-gray-600"><span class="mr-2 text-red-400">×</span>
-                                    <?= htmlspecialchars($inc) ?></li>
+                                <li class="flex items-start text-sm text-gray-600"><span
+                                        class="mr-2 text-red-400">×</span><?= htmlspecialchars($inc) ?></li>
                             <?php endforeach; ?>
                         </ul>
                     <?php endif; ?>
@@ -248,21 +272,37 @@ require __DIR__ . '/../layout/header.php';
                 </div>
             <?php endif; ?>
 
-            <!-- ========================================== -->
-            <!-- 2. GALERÍA DE IMÁGENES (Grid Bottom)       -->
-            <!-- ========================================== -->
+            <!-- GALERIA (Grid Bottom) -->
             <div class="pt-10 mt-10 border-t border-gray-100">
                 <h3 class="text-3xl font-bold text-gray-900 mb-6">📸 Galería de Fotos</h3>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     <?php
                     $galleryImages = [];
                     foreach ($images as $index => $imgData) {
-                        $safePath = ltrim($imgData['image_path'], '/');
-                        if (strpos($safePath, 'assets') === false && strpos($safePath, '/') === false) {
-                            $safePath = 'assets/uploads/' . $safePath;
+                        // Same Robust Logic for Gallery Images
+                        $rawPath = $imgData['image_path'] ?? '';
+                        $finalUrl = "https://placehold.co/800x800/e2e8f0/475569?text=Foto+" . ($index + 1);
+
+                        // Copy-paste logic from Header (simplified)
+                        if (!empty($rawPath)) {
+                            if (filter_var($rawPath, FILTER_VALIDATE_URL)) {
+                                $finalUrl = $rawPath;
+                            } else {
+                                $cleanP = ltrim($rawPath, '/');
+                                $cands = (strpos($cleanP, 'assets/') === false)
+                                    ? ['assets/uploads/' . $cleanP, 'assets/images/' . $cleanP]
+                                    : [$cleanP];
+                                foreach ($cands as $c) {
+                                    if (file_exists(__DIR__ . '/../../../public/' . $c)) {
+                                        $finalUrl = "/" . $c;
+                                        break;
+                                    }
+                                }
+                            }
                         }
+
                         $galleryImages[] = [
-                            'src' => '/' . $safePath,
+                            'src' => $finalUrl,
                             'alt' => $imgData['description'] ?? $tour['title']
                         ];
                     }
@@ -295,10 +335,6 @@ require __DIR__ . '/../layout/header.php';
                         <span class="text-xl mr-3">⏱️</span>
                         <span class="font-bold"><?= htmlspecialchars($tour['duration']) ?></span>
                     </div>
-                    <div class="flex items-center text-gray-700 bg-gray-50 p-4 rounded-xl">
-                        <span class="text-xl mr-3">📍</span>
-                        <span class="font-bold">Salida: Bayahibe / Romana</span>
-                    </div>
                 </div>
 
                 <button onclick="openBookingModal()"
@@ -318,7 +354,7 @@ require __DIR__ . '/../layout/header.php';
 <!-- 3. MOBILE APP BAR (Bottom Fixed)           -->
 <!-- ========================================== -->
 <div
-    class="lg:hidden fixed bottom-4 left-4 right-4 bg-white/90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-2xl z-50 p-2 flex items-center justify-between">
+    class="lg:hidden fixed bottom-4 left-4 right-4 bg-white border border-gray-200 rounded-2xl shadow-2xl z-[9999] p-2 flex items-center justify-between">
 
     <!-- Left Group: Navigation -->
     <div class="flex items-center space-x-1 pl-2">
@@ -480,17 +516,17 @@ require __DIR__ . '/../layout/header.php';
         updateLightboxImage();
     }
 
-    function updateLightboxImage() {
+     function updateLightboxImage() {
         if (galleryImages.length > 0) {
             document.getElementById('lightboxImg').src = galleryImages[currentImageIndex].src;
         }
     }
 
     // Teclado
-    document.addEventListener('keydown', function (e) {
-        if (document.getElementById('lightboxModal').classList.contains('hidden')) return;
-        if (e.key === 'Escape') closeLightbox();
-        if (e.key === 'ArrowRight') nextImage();
+     document.addEven tListener('keydown', function (e) {
+        if (document.getElementById('lightboxModal').c lassList.contains('hidden')) return;
+        if  (e.key === 'Escape') closeLightbox();
+        if  (e.key === 'ArrowRight') nextImage();
         if (e.key === 'ArrowLeft') prevImage();
     });
 
