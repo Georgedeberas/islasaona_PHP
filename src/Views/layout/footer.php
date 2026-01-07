@@ -1,90 +1,154 @@
+<?php
+// layout/footer.php - Global Footer
+// Ensure settings are loaded
+if (!isset($conf)) {
+    $settingModel_f = new \App\Models\Setting();
+    $settingsRaw_f = $settingModel_f->getAllFull();
+    $conf = [];
+    foreach ($settingsRaw_f as $s)
+        $conf[$s['setting_key']] = $s['setting_value'];
+}
+?>
 </main>
 <!-- Footer -->
-<footer class="bg-secondary text-white py-12 border-t border-blue-900">
-    <div class="container mx-auto px-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 mb-8">
-            <!-- Branding -->
-            <div>
-                <h3 class="text-2xl font-bold mb-4 text-primary">
-                    <?= htmlspecialchars($settings['company_name'] ?? 'Mochileros RD') ?></h3>
-                <p class="text-gray-300 text-sm leading-relaxed mb-4">
-                    <?= nl2br(htmlspecialchars($settings['footer_text'] ?? '')) ?>
+<footer class="bg-secondary text-white py-16 border-t border-white/5 relative overflow-hidden">
+    <!-- Decorative background elements -->
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-blue-500 to-primary opacity-50">
+    </div>
+
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+
+            <!-- 1. Brand & Bio -->
+            <div class="lg:col-span-1">
+                <h3 class="text-2xl font-bold mb-6 text-white font-heading tracking-wide">
+                    <?= htmlspecialchars($conf['company_name'] ?? 'Mochileros RD') ?>
+                    <span class="text-primary">.</span>
+                </h3>
+                <p class="text-gray-400 text-sm leading-relaxed mb-6 border-l-2 border-primary pl-4">
+                    <?= nl2br(htmlspecialchars($conf['footer_text'] ?? 'Explora los mejores destinos de República Dominicana con expertos locales.')) ?>
                 </p>
-                <div class="flex space-x-4">
-                    <?php if (!empty($settings['instagram_url'])): ?>
-                        <a href="<?= $settings['instagram_url'] ?>" target="_blank"
-                            class="bg-white/10 p-2 rounded-full hover:bg-primary transition">📸</a>
+
+                <div class="flex items-center gap-3">
+                    <?php if (!empty($conf['social_instagram'])): ?>
+                        <a href="<?= $conf['social_instagram'] ?>" target="_blank"
+                            class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-red-500 hover:to-purple-600 hover:border-transparent transition-all duration-300 group">
+                            <span class="text-lg group-hover:scale-110 transition-transform">📸</span>
+                        </a>
                     <?php endif; ?>
-                    <?php if (!empty($settings['facebook_url'])): ?>
-                        <a href="<?= $settings['facebook_url'] ?>" target="_blank"
-                            class="bg-white/10 p-2 rounded-full hover:bg-primary transition">👍</a>
+                    <?php if (!empty($conf['social_facebook'])): ?>
+                        <a href="<?= $conf['social_facebook'] ?>" target="_blank"
+                            class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-blue-600 hover:border-transparent transition-all duration-300 group">
+                            <span class="text-lg group-hover:scale-110 transition-transform">f</span>
+                        </a>
                     <?php endif; ?>
-                    <?php if (!empty($settings['tiktok_url'])): ?>
-                        <a href="<?= $settings['tiktok_url'] ?>" target="_blank"
-                            class="bg-white/10 p-2 rounded-full hover:bg-primary transition">🎵</a>
+                    <?php if (!empty($conf['social_tiktok'])): ?>
+                        <a href="<?= $conf['social_tiktok'] ?>" target="_blank"
+                            class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-black hover:border-transparent transition-all duration-300 group">
+                            <span class="text-lg group-hover:scale-110 transition-transform">🎵</span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (!empty($conf['social_tripadvisor'])): ?>
+                        <a href="<?= $conf['social_tripadvisor'] ?>" target="_blank"
+                            class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#00af87] hover:border-transparent transition-all duration-300 group">
+                            <span class="text-lg group-hover:scale-110 transition-transform">🦉</span>
+                        </a>
                     <?php endif; ?>
                 </div>
             </div>
 
-            <!-- Links -->
+            <!-- 2. Quick Links -->
             <div>
-                <h3 class="text-lg font-bold mb-4 text-white border-b border-primary/30 inline-block pb-1">Explora</h3>
-                <ul class="space-y-2 text-sm text-gray-300">
-                    <li><a href="/" class="hover:text-primary transition flex items-center"><span
-                                class="text-primary mr-2">›</span>Inicio</a></li>
-                    <li><a href="/#tours" class="hover:text-primary transition flex items-center"><span
-                                class="text-primary mr-2">›</span>Nuestras Excursiones</a></li>
-                    <li><a href="/about" class="hover:text-primary transition flex items-center"><span
-                                class="text-primary mr-2">›</span>Quiénes Somos</a></li>
-                    <li><a href="/contact" class="hover:text-primary transition flex items-center"><span
-                                class="text-primary mr-2">›</span>Contacto</a></li>
+                <h4 class="text-white font-bold mb-6 text-sm uppercase tracking-wider opacity-80">Navegación</h4>
+                <ul class="space-y-3 text-sm text-gray-400">
+                    <li><a href="/"
+                            class="hover:text-primary hover:translate-x-1 transition-transform inline-block">Inicio</a>
+                    </li>
+                    <li><a href="/#tours"
+                            class="hover:text-primary hover:translate-x-1 transition-transform inline-block">Tours &
+                            Excursiones</a></li>
+                    <li><a href="/about"
+                            class="hover:text-primary hover:translate-x-1 transition-transform inline-block">Nuestra
+                            Historia</a></li>
+                    <li><a href="/gallery"
+                            class="hover:text-primary hover:translate-x-1 transition-transform inline-block">Galería</a>
+                    </li>
+                    <li><a href="/contact"
+                            class="hover:text-primary hover:translate-x-1 transition-transform inline-block">Contacto</a>
+                    </li>
                 </ul>
             </div>
 
-            <!-- Contact Info -->
-            <div>
-                <h3 class="text-lg font-bold mb-4 text-white border-b border-primary/30 inline-block pb-1">Contáctanos
-                </h3>
-                <ul class="space-y-4 text-sm text-gray-300">
-                    <?php if (!empty($settings['phone_main'])): ?>
-                        <li class="flex items-start">
-                            <span class="text-2xl mr-3">📞</span>
-                            <div>
-                                <span class="block font-bold text-white">Llámanos</span>
-                                <a href="tel:<?= $settings['phone_main'] ?>"
-                                    class="hover:text-primary"><?= $settings['phone_main'] ?></a>
+            <!-- 3. Contact Info -->
+            <div class="md:col-span-2">
+                <h4 class="text-white font-bold mb-6 text-sm uppercase tracking-wider opacity-80">Información de
+                    Contacto</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 text-sm text-gray-400">
+
+                    <?php if (!empty($conf['contact_phone'])): ?>
+                        <div class="flex items-start gap-4 group">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                                📞
                             </div>
-                        </li>
+                            <div>
+                                <span class="block text-white font-bold mb-0.5">Reservas</span>
+                                <a href="tel:<?= $conf['contact_phone'] ?>"
+                                    class="hover:text-primary transition-colors"><?= $conf['contact_phone'] ?></a>
+                            </div>
+                        </div>
                     <?php endif; ?>
 
-                    <?php if (!empty($settings['whatsapp_number'])): ?>
-                        <li class="flex items-start">
-                            <span class="text-2xl mr-3">💬</span>
-                            <div>
-                                <span class="block font-bold text-white">WhatsApp</span>
-                                <a href="https://wa.me/<?= $settings['whatsapp_number'] ?>" class="hover:text-primary">Chat
-                                    Directo</a>
+                    <?php if (!empty($conf['contact_email'])): ?>
+                        <div class="flex items-start gap-4 group">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                                ✉️
                             </div>
-                        </li>
+                            <div>
+                                <span class="block text-white font-bold mb-0.5">Email</span>
+                                <a href="mailto:<?= $conf['contact_email'] ?>"
+                                    class="hover:text-primary transition-colors truncate max-w-[150px] inline-block"><?= $conf['contact_email'] ?></a>
+                            </div>
+                        </div>
                     <?php endif; ?>
 
-                    <?php if (!empty($settings['email_contact'])): ?>
-                        <li class="flex items-start">
-                            <span class="text-2xl mr-3">✉️</span>
-                            <div>
-                                <span class="block font-bold text-white">Email</span>
-                                <a href="mailto:<?= $settings['email_contact'] ?>"
-                                    class="hover:text-primary"><?= $settings['email_contact'] ?></a>
+                    <?php if (!empty($conf['contact_address'])): ?>
+                        <div class="flex items-start gap-4 group sm:col-span-2">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                                📍
                             </div>
-                        </li>
+                            <div>
+                                <span class="block text-white font-bold mb-0.5">Oficina</span>
+                                <span><?= $conf['contact_address'] ?></span>
+                            </div>
+                        </div>
                     <?php endif; ?>
-                </ul>
+
+                </div>
             </div>
         </div>
 
-        <div class="border-t border-white/10 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($settings['company_name'] ?? 'Mochileros RD') ?>. Todos los
-                derechos reservados.</p>
+        <!-- Copyright -->
+        <div
+            class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-4">
+            <div class="text-center md:text-left">
+                &copy; <?= date('Y') ?> <strong
+                    class="text-gray-400"><?= htmlspecialchars($conf['legal_copyright'] ?? 'Mochileros RD') ?></strong>.
+                Todos los derechos reservados.
+            </div>
+
+            <div class="flex items-center gap-6">
+                <?php if (!empty($conf['legal_privacy_link'])): ?>
+                    <a href="<?= $conf['legal_privacy_link'] ?>" class="hover:text-white transition-colors">Política de
+                        Privacidad</a>
+                <?php endif; ?>
+                <?php if (!empty($conf['legal_terms_link'])): ?>
+                    <a href="<?= $conf['legal_terms_link'] ?>" class="hover:text-white transition-colors">Términos y
+                        Condiciones</a>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </footer>
