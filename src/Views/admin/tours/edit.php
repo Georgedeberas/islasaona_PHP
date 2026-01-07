@@ -404,6 +404,26 @@ if (isset($_GET['success'])): ?>
         freqSelect.addEventListener('change', toggleDates);
         toggleDates(); // Init
     }
+    // OG Live Preview
+    const seoTitleInput = document.getElementById('seo_title');
+    const titleInput = document.getElementById('input_title');
+    const seoDescInput = document.getElementById('seo_description');
+    
+    const ogTitle = document.getElementById('og-title-preview');
+    const ogDesc = document.getElementById('og-desc-preview');
+
+    function updatePreview() {
+        // Logica prioridad: seo_title > title
+        const t = (seoTitleInput && seoTitleInput.value.trim()) || (titleInput && titleInput.value.trim()) || 'Título del Tour';
+        if(ogTitle) ogTitle.innerText = t;
+        
+        const d = (seoDescInput && seoDescInput.value.trim()) || 'Descripción breve que aparecerá al compartir...';
+        if(ogDesc) ogDesc.innerText = d;
+    }
+
+    if(seoTitleInput) seoTitleInput.addEventListener('input', updatePreview);
+    if(titleInput) titleInput.addEventListener('input', updatePreview);
+    if(seoDescInput) seoDescInput.addEventListener('input', updatePreview);
 </script>
 </body>
 </html>
