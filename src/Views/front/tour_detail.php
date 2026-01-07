@@ -10,6 +10,7 @@ $reviews = !empty($tour['review_count']) ? $tour['review_count'] : '124';
 $highlights = json_decode($tour['tour_highlights'] ?? '[]', true);
 
 // Construcción del Schema
+use App\Helpers\FrontHelper;
 $schema = [
     "@context" => "https://schema.org",
     "@type" => $tour['schema_type'] ?? 'TouristTrip',
@@ -120,7 +121,7 @@ require __DIR__ . '/../layout/header.php';
         }
     }
     ?>
-    <img src="<?= $coverUrl ?>" alt="Portada <?= htmlspecialchars($tour['title']) ?>"
+    <img src="<?= $coverUrl ?>" alt="Portada <?= htmlspecialchars($tour['title']) ?>" fetchpriority="high"
         class="w-full h-full object-cover">
     <!-- Gradiente sutil -->
     <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
@@ -133,11 +134,7 @@ require __DIR__ . '/../layout/header.php';
 
     <!-- Título y Breadcrumbs -->
     <div class="mb-10">
-        <nav
-            class="text-sm text-gray-700 mb-3 bg-white/90 backdrop-blur inline-block px-4 py-1.5 rounded-full shadow-sm border border-gray-100">
-            <a href="/" class="hover:text-primary font-medium">Inicio</a> <span class="text-gray-400 mx-1">></span>
-            <span class="text-gray-900 font-bold"><?= htmlspecialchars($tour['title']) ?></span>
-        </nav>
+        <?= FrontHelper::breadcrumbs($tour['title']) ?>
 
         <h1
             class="text-3xl md:text-5xl font-black mb-3 text-gray-900 tracking-tight leading-tight drop-shadow-sm bg-white/50 p-2 rounded-lg inline-block backdrop-blur-sm">
@@ -187,7 +184,7 @@ require __DIR__ . '/../layout/header.php';
             <?php if (!empty($tour['description_long'])): ?>
                 <div class="prose max-w-none text-gray-600 leading-relaxed text-lg">
                     <h2 class="text-2xl font-bold text-gray-900 mb-4">Sobre esta experiencia</h2>
-                    <?= $tour['description_long'] ?>
+                    <?= FrontHelper::parseShortcodes($tour['description_long']) ?>
                 </div>
             <?php endif; ?>
 
@@ -299,9 +296,10 @@ require __DIR__ . '/../layout/header.php';
                 <h3 class="text-3xl font-bold text-gray-900 mb-6 flex items-center">
                     📸 Galería <span class="text-sm font-normal text-gray-500 ml-3 md:hidden">(Desliza para ver)</span>
                 </h3>
-                
+
                 <!-- Container: Flex on Mobile (Stories), Grid on Desktop -->
-                <div class="flex overflow-x-auto snap-x snap-mandatory gap-3 pb-4 md:grid md:grid-cols-3 lg:grid-cols-4 md:overflow-visible md:pb-0" style="scrollbar-width: none; -ms-overflow-style: none;">
+                <div class="flex overflow-x-auto snap-x snap-mandatory gap-3 pb-4 md:grid md:grid-cols-3 lg:grid-cols-4 md:overflow-visible md:pb-0"
+                    style="scrollbar-width: none; -ms-overflow-style: none;">
                     <?php
                     $galleryImages = [];
                     foreach ($images as $index => $imgData) {
@@ -338,12 +336,13 @@ require __DIR__ . '/../layout/header.php';
                         <!-- Item: Full width on mobile, auto on desktop -->
                         <div class="snap-center shrink-0 w-[85vw] md:w-auto aspect-[4/5] md:aspect-square rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition cursor-pointer group relative"
                             onclick="openLightbox(<?= $idx ?>)">
-                            <img src="<?= $img['src'] ?>" alt="<?= htmlspecialchars($img['alt']) ?>"
+                            <img src="<?= $img['src'] ?>" alt="<?= htmlspecialchars($img['alt']) ?>" loading="lazy"
                                 class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
                             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition"></div>
-                            
+
                             <!-- Mobile Hint -->
-                            <div class="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full md:hidden backdrop-blur-sm">
+                            <div
+                                class="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full md:hidden backdrop-blur-sm">
                                 <?= $idx + 1 ?> / <?= count($galleryImages) ?>
                             </div>
                         </div>

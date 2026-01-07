@@ -1,4 +1,7 @@
 <?php
+if (session_status() === PHP_SESSION_NONE)
+    session_start();
+
 // Cargar configuraciones globales
 use App\Models\Setting;
 use App\Models\Page; // NEW: Para menú dinámico
@@ -73,9 +76,34 @@ $whatsapp = $settings['whatsapp_number'] ?? '';
             }
         });
     </script>
+    <script src="/assets/js/live_search.js" defer></script>
 </head>
 
 <body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
+
+    <!-- ADMIN BAR (Phase 4) -->
+    <?php if (isset($_SESSION['user_id'])): ?>
+        <div
+            class="bg-gray-900 text-white text-xs font-mono py-2 px-4 flex justify-between items-center sticky top-0 z-[99999] border-b border-gray-700 shadow-xl">
+            <div class="flex items-center gap-3">
+                <span class="text-green-400 animate-pulse">●</span>
+                <span class="font-bold tracking-wide uppercase">Mochileros Admin</span>
+            </div>
+            <div class="flex gap-4 items-center">
+                <a href="/admin/dashboard" class="flex items-center gap-1 hover:text-white text-gray-400 transition mr-2">
+                    Dashboard</a>
+                <a href="/admin/tours" class="flex items-center gap-1 hover:text-white text-gray-400 transition mr-4">
+                    Tours</a>
+
+                <?php if (isset($tour['id'])): ?>
+                    <a href="/admin/tours/edit?id=<?= $tour['id'] ?>"
+                        class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-500 transition font-bold flex items-center gap-2 border border-blue-400">
+                        ✏️ Editar Tour
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <!-- Top Bar Contact -->
     <div class="bg-secondary text-white text-xs py-2">
@@ -125,6 +153,18 @@ $whatsapp = $settings['whatsapp_number'] ?? '';
                         class="hover:text-primary transition"><?= htmlspecialchars($mp['title']) ?></a>
                 <?php endforeach; ?>
             </nav>
+
+            <!-- Search Bar (Desktop) -->
+            <div class="relative hidden lg:block w-64 mx-4">
+                <input type="text" name="q" placeholder="Buscar paraíso..."
+                    class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary focus:outline-none transition text-sm text-gray-700 shadow-sm hover:shadow">
+                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <!-- Resultados se inyectan aquí por JS -->
+            </div>
 
             <!-- Actions -->
             <div class="flex items-center space-x-3">
