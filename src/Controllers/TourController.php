@@ -92,6 +92,8 @@ class TourController
             'info_what_to_bring' => $_POST['info_what_to_bring'] ?? '',
             'frequency_type' => $_POST['frequency_type'] ?? 'daily',
             'specific_dates' => !empty($_POST['specific_dates']) ? explode(',', $_POST['specific_dates']) : [],
+            // Seasonal Pricing (JSON string from UI)
+            'price_rules' => $_POST['price_rules'] ?? null,
 
             // SEO
             'seo_title' => $_POST['seo_title'] ?? '',
@@ -117,6 +119,71 @@ class TourController
 
             header("Location: /admin/tours/edit?id=$id&success=1");
             exit;
+
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function duplicate($id)
+    {
+        AuthController::requireLogin();
+        try {
+            $tourModel = new Tour();
+            // Get original
+            // TODO: Optimize getById helper later
+            $allTours = $tourModel->getAll(false);
+            $original = null;
+            foreach ($allTours as $t) {
+                if ($t['id'] == $id) {
+                    $original = $t;
+                    break;
+                }
+            }
+
+            if (!$original)
+                die("Original tour not found");
+
+            // Prepare Cloned Data - Remove ID and non-clonable meta
+            $newData = $original;
+            unset($newData['id'], $newData['created_at'], $newData['updated_at']);
+
+            $newData['title'] = $original['title'] . ' (Copia)';
+            $newData['slug'] = $this->slugify($newData['title']);
+            $newData['is_active'] = 0; // Draft by default
+
+            // JSON fields likely come as strings from DB, create needs array or specific handling?
+            // create() expects arrays for JSON fields if we follow store() Logic...
+            // BUT store() Logic gets raw strings from POST? No, store calls getPostData which creates arrays/strings...
+            // Let's check create() in Model: It expects arrays or encoded strings?
+            // Model::create() does json_encode() if it IS array. If it's already string (from DB select), it might double encode if input is string?
+            // "is_array($data['includes']) ? json_encode... : $data['includes'] ?? '[]'"
+            // So if DB returns string "['foo']", it passes as string. Safe.
+
+            // However, we must ensure keys match create() expectations.
+            // create() params: :seo_title, etc. which are keys in $data.
+            // $original keys match DB columns. Model::create() uses $data keys to bind :params.
+            // Model::create() Params match: :title, :slug, etc.
+            // So passing $original array (filtered) should work if column names match params.
+
+            $newId = $tourModel->create($newData);
+
+            if ($newId) {
+                // Clone Images? Maybe later. For now just data.
+                // If user desires image cloning, we need to copy files and DB rows.
+                // Let's do simple image cloning for cover at least?
+                // "Clonador de Ofertas" usually implies full clone.
+                // Let's try to clone images DB rows pointing to SAME files (efficient).
+                $images = $tourModel->getImages($id);
+                foreach ($images as $img) {
+                    $tourModel->addImage($newId, $img['image_path'], $img['is_cover']);
+                }
+
+                header("Location: /admin/tours/edit?id=$newId&success=cloned");
+                exit;
+            } else {
+                throw new \Exception("Error duplicating tour");
+            }
 
         } catch (\Exception $e) {
             die($e->getMessage());

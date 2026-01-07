@@ -47,7 +47,8 @@ class Tour
         'info_important',
         'info_what_to_bring',
         'frequency_type',
-        'specific_dates'
+        'specific_dates',
+        'price_rules'
     ];
 
     public function getAll($activeOnly = true)
@@ -115,10 +116,10 @@ class Tour
 
         $sql = "INSERT INTO tours (
                     title, slug, description_short, description_long, price_adult, price_child, duration, includes, not_included, display_style, is_active,
-                    seo_title, seo_description, keywords, schema_type, rating_score, review_count, tour_highlights
+                    seo_title, seo_description, keywords, schema_type, rating_score, review_count, tour_highlights, price_rules
                 ) VALUES (
                     :title, :slug, :description_short, :description_long, :price_adult, :price_child, :duration, :includes, :not_included, :display_style, :is_active,
-                    :seo_title, :seo_description, :keywords, :schema_type, :rating_score, :review_count, :tour_highlights
+                    :seo_title, :seo_description, :keywords, :schema_type, :rating_score, :review_count, :tour_highlights, :price_rules
                 )";
 
         $stmt = $this->db->prepare($sql);
@@ -142,7 +143,8 @@ class Tour
             ':schema_type' => $data['schema_type'] ?? 'TouristTrip',
             ':rating_score' => $data['rating_score'] ?? 4.8,
             ':review_count' => $data['review_count'] ?? 0,
-            ':tour_highlights' => is_array($data['tour_highlights'] ?? null) ? json_encode($data['tour_highlights']) : ($data['tour_highlights'] ?? '[]')
+            ':tour_highlights' => is_array($data['tour_highlights'] ?? null) ? json_encode($data['tour_highlights']) : ($data['tour_highlights'] ?? '[]'),
+            ':price_rules' => $data['price_rules'] ?? null
         ];
 
         if ($stmt->execute($params)) {
