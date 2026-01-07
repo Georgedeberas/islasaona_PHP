@@ -158,13 +158,46 @@ class Tour
         $fields = [];
         $params = [':id' => $id];
 
-        foreach ($data as $key => $value) {
-            $fields[] = "$key = :$key";
-            if (in_array($key, ['includes', 'not_included', 'tour_highlights']) && is_array($value)) {
-                $params[':' . $key] = json_encode($value);
-            } else {
-                $params[':' . $key] = $value;
+        // Usar $this->fillable si está definido, sino fallback a los antiguos
+        // Como acabamos de agregarlo, usamos una lista segura combinada aquí para garantizar funcionamiento
+        $allowedFields = $this->fillable ?? [
+            'title',
+            'slug',
+            'description_short',
+            'description_long',
+            'price_adult',
+            'price_child',
+            'duration',
+            'location',
+            'includes',
+            'not_included',
+            'is_active',
+            'seo_title',
+            'seo_description',
+            'keywords',
+            'schema_type',
+            'rating_score',
+            'review_count',
+            'tour_highlights'
+        ];
+
+        foreach ($allowedFields as $key) {
+            if (isset($data[$key])) {
+                $fields[] = "$key = :$key";
+                $value = $data[$key];
+
+                // Arrays a JSON
+                if (is_array($value) || in_array($key, ['includes', 'not_included', 'tour_highlights', 'specific_dates'])) {
+                    if (is_array($value))
+                        $value = json_encode($value, JSON_UNESCAPED_UNICODE);
+                }
+
+                $params[":$key"] = $value;
             }
+        }
+
+        if (empty($fields)) {
+            return true; // No changes needed
         }
 
         $sql = "UPDATE tours SET " . implode(', ', $fields) . " WHERE id = :id";
