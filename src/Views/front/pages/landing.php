@@ -8,14 +8,13 @@ $meta = json_decode($page['meta_data'] ?? '[]', true);
 <main>
     <!-- Hero Section -->
     <div class="relative h-[60vh] flex items-center justify-center overflow-hidden">
-        <?php if (!empty($meta['hero_image'])): ?>
-            <div class="absolute inset-0 z-0">
-                <img src="<?= $meta['hero_image'] ?>" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-black/50"></div>
-            </div>
-        <?php else: ?>
-            <div class="absolute inset-0 z-0 bg-secondary"></div>
-        <?php endif; ?>
+        <?php
+        $heroImg = !empty($meta['hero_image']) ? $meta['hero_image'] : '/assets/img/placeholders/gray-landscape.webp';
+        ?>
+        <div class="absolute inset-0 z-0">
+            <img src="<?= $heroImg ?>" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-black/50"></div>
+        </div>
 
         <div class="relative z-10 text-center text-white px-4 max-w-4xl">
             <h1 class="text-5xl md:text-6xl font-bold mb-6 font-heading drop-shadow-md">

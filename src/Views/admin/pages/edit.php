@@ -66,22 +66,27 @@
                         <div class="card shadow-sm h-100 bg-light">
                             <div class="card-header fw-bold">Plantilla Actual</div>
                             <div class="card-body p-2 d-flex flex-column gap-2">
-                                <?php $tpl = $page['template'] ?? 'classic'; ?>
-                                <div class="template-option p-3 border rounded bg-white cursor-pointer <?= $tpl == 'classic' ? 'active-template' : '' ?>"
-                                    onclick="selectTemplate('classic', this)">
-                                    <h6 class="mb-1">📝 Clásica</h6>
-                                    <small class="text-muted">Texto enriquecido estándar.</small>
-                                </div>
-                                <div class="template-option p-3 border rounded bg-white cursor-pointer <?= $tpl == 'landing' ? 'active-template' : '' ?>"
-                                    onclick="selectTemplate('landing', this)">
-                                    <h6 class="mb-1">🚀 Landing Page</h6>
-                                    <small class="text-muted">Hero, Features y CTA.</small>
-                                </div>
-                                <div class="template-option p-3 border rounded bg-white cursor-pointer <?= $tpl == 'gallery' ? 'active-template' : '' ?>"
-                                    onclick="selectTemplate('gallery', this)">
-                                    <h6 class="mb-1">🖼️ Galería Visual</h6>
-                                    <small class="text-muted">Grid de fotos y Lightbox.</small>
-                                </div>
+                                <?php
+                                $templates = [
+                                    'classic' => ['icon' => '📝', 'title' => 'Clásica', 'desc' => 'Texto enriquecido estándar.'],
+                                    'landing' => ['icon' => '🚀', 'title' => 'Landing Page', 'desc' => 'Hero, Features y CTA.'],
+                                    'gallery' => ['icon' => '🖼️', 'title' => 'Galería Visual', 'desc' => 'Grid de fotos y Lightbox.']
+                                ];
+                                $currentTpl = $page['template'] ?? 'classic';
+                                foreach ($templates as $key => $t):
+                                    ?>
+                                    <div class="template-option p-3 border rounded bg-white cursor-pointer d-flex justify-content-between align-items-center <?= $currentTpl == $key ? 'active-template' : '' ?>"
+                                        onclick="selectTemplate('<?= $key ?>', this)">
+                                        <div>
+                                            <h6 class="mb-1"><?= $t['icon'] ?>     <?= $t['title'] ?></h6>
+                                            <small class="text-muted"><?= $t['desc'] ?></small>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ms-2"
+                                            onclick="event.stopPropagation(); showPreview('<?= $key ?>')">
+                                            👁️
+                                        </button>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     </div>
@@ -107,12 +112,12 @@
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Título Principal</label>
-                                    <input type="text" name="hero_title" class="form-control"
+                                    <input type="text" name="hero_title" id="hero_title" class="form-control"
                                         value="<?= htmlspecialchars($meta['hero_title'] ?? '') ?>">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Subtítulo</label>
-                                    <input type="text" name="hero_subtitle" class="form-control"
+                                    <input type="text" name="hero_subtitle" id="hero_subtitle" class="form-control"
                                         value="<?= htmlspecialchars($meta['hero_subtitle'] ?? '') ?>">
                                 </div>
                             </div>
@@ -127,12 +132,12 @@
                             <div class="row mb-4">
                                 <div class="col-md-6">
                                     <label class="form-label">Texto CTA</label>
-                                    <input type="text" name="cta_text" class="form-control"
+                                    <input type="text" name="cta_text" id="cta_text" class="form-control"
                                         value="<?= htmlspecialchars($meta['cta_text'] ?? '') ?>">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Enlace CTA</label>
-                                    <input type="text" name="cta_link" class="form-control"
+                                    <input type="text" name="cta_link" id="cta_link" class="form-control"
                                         value="<?= htmlspecialchars($meta['cta_link'] ?? '') ?>">
                                 </div>
                             </div>
@@ -207,6 +212,21 @@
                 </div>
             </form>
 
+            <!-- Modal Preview -->
+            <div class="modal fade" id="previewModal" tabindex="-1">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Vista Previa de Estructura</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center bg-dark">
+                            <img id="previewImage" src="" class="img-fluid rounded border" style="max-height: 80vh;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <style>
                 .cursor-pointer {
                     cursor: pointer;
@@ -231,6 +251,12 @@
                     element.classList.add('active-template');
                     document.querySelectorAll('.template-section').forEach(el => el.classList.add('d-none'));
                     document.getElementById('section-' + templateName).classList.remove('d-none');
+                }
+
+                function showPreview(template) {
+                    const img = '/assets/img/templates/preview_' + template + '.webp';
+                    document.getElementById('previewImage').src = img;
+                    new bootstrap.Modal(document.getElementById('previewModal')).show();
                 }
             </script>
         </div>

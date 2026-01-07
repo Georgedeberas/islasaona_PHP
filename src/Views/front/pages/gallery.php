@@ -35,8 +35,29 @@ $meta = json_decode($page['meta_data'] ?? '[]', true);
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
-            <div class="text-center py-20 bg-gray-50 rounded-xl">
-                <p class="text-gray-400">No hay imágenes en esta galería todavía.</p>
+            <!-- Placeholder Grid -->
+            <div
+                class="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 opacity-50 grayscale hover:grayscale-0 transition duration-500">
+                <?php
+                $placeholders = [
+                    '/assets/img/placeholders/gray-landscape.webp',
+                    '/assets/img/placeholders/gray-square.webp',
+                    '/assets/img/placeholders/gray-landscape.webp',
+                    '/assets/img/placeholders/gray-square.webp',
+                    '/assets/img/placeholders/gray-landscape.webp',
+                    '/assets/img/placeholders/gray-square.webp'
+                ];
+                foreach ($placeholders as $img): ?>
+                    <div class="break-inside-avoid relative group cursor-pointer overflow-hidden rounded-xl shadow-md">
+                        <img src="<?= $img ?>" class="w-full h-auto">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-xs text-black/50 font-mono bg-white/80 px-2 py-1 rounded">Ejemplo</span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <div class="text-center mt-4 text-gray-400 text-sm">
+                (Esta es una vista previa. Sube tus fotos para reemplazar estos cuadros)
             </div>
         <?php endif; ?>
 
