@@ -115,7 +115,7 @@ class TourController
             // Imágenes
             $this->handleImages($id, true);
 
-            header("Location: /admin/tours/edit/$id?success=1");
+            header("Location: /admin/tours/edit?id=$id&success=1");
             exit;
 
         } catch (\Exception $e) {
@@ -151,7 +151,7 @@ class TourController
             // Subir Nuevas
             $this->handleImages($id);
 
-            header("Location: /admin/tours/edit/$id?success=1");
+            header("Location: /admin/tours/edit?id=$id&success=1");
             exit;
 
         } catch (\Exception $e) {
