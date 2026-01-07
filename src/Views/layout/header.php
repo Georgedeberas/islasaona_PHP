@@ -42,6 +42,40 @@ $whatsapp = $settings['whatsapp_number'] ?? '';
             }
         }
     </script>
+    <style>
+        /* Clean Google Translate */
+        .goog-te-banner-frame {
+            display: none !important;
+        }
+
+        .goog-te-gadget-simple {
+            background-color: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            font-size: 14px !important;
+        }
+
+        .goog-te-gadget-simple .goog-te-menu-value {
+            color: #4b5563 !important;
+        }
+
+        .goog-te-gadget-simple .goog-te-menu-value span {
+            border-left: none !important;
+            color: #4b5563 !important;
+        }
+
+        .goog-te-gadget-icon {
+            display: none !important;
+        }
+
+        body {
+            top: 0 !important;
+        }
+
+        #google_translate_element {
+            display: inline-block;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
@@ -50,8 +84,11 @@ $whatsapp = $settings['whatsapp_number'] ?? '';
     <div class="bg-secondary text-white text-xs py-2">
         <div class="container mx-auto px-4 flex justify-between items-center">
             <div class="flex items-center space-x-4">
+                <!-- Lang Selector -->
+                <div id="google_translate_element"></div>
+
                 <?php if ($phone): ?>
-                    <span>📞 <?= htmlspecialchars($phone) ?></span>
+                    <span class="hidden sm:inline">📞 <?= htmlspecialchars($phone) ?></span>
                 <?php endif; ?>
                 <span class="hidden md:inline">📍
                     <?= htmlspecialchars($settings['address'] ?? 'Republica Dominicana') ?></span>
@@ -112,6 +149,20 @@ $whatsapp = $settings['whatsapp_number'] ?? '';
         </div>
 
         <!-- Mobile Menu (DYNAMIC MENU) -->
+        <script type="text/javascript">
+            function googleTranslateElementInit() {
+                console.log('Google Translate Init Started...');
+                new google.translate.TranslateElement({
+                    pageLanguage: 'es',
+                    includedLanguages: 'en,fr,de,it,ru,pt',
+                    layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                    autoDisplay: false
+                }, 'google_translate_element');
+            }
+        </script>
+        <script type="text/javascript"
+            src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
         <div id="mobile-menu" class="hidden md:hidden border-t">
             <a href="/" class="block px-4 py-2 hover:bg-gray-100">Inicio</a>
             <a href="/#tours" class="block px-4 py-2 hover:bg-gray-100">Tours</a>
