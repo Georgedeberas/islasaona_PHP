@@ -524,6 +524,7 @@ require __DIR__ . '/../layout/header.php';
     ?>
     const ADMIN_PHONE = "<?= $cleanPhone ?>";
     const TRAFFIC_SOURCE = "<?= $origen ?>";
+    const TOUR_ID = "<?= $tour['id'] ?>";
 
     // LIGHTBOX LOGIC
     const galleryImages = <?= json_encode($galleryImages) ?>;
@@ -596,8 +597,10 @@ require __DIR__ . '/../layout/header.php';
 
         msg += `\n¿Disponibilidad?`;
 
-        const url = `https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(msg)}`;
-        window.open(url, '_blank');
+        // PHASE 7: Sales Intelligence Tracking
+        const trackUrl = `/go/wa?tour_id=${TOUR_ID}&source=tour_detail_modal&phone=${ADMIN_PHONE}&text=${encodeURIComponent(msg)}`;
+        window.open(trackUrl, '_blank');
+
         closeBookingModal();
     }
 </script>

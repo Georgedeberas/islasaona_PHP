@@ -17,10 +17,17 @@ use App\Controllers\TourController;
 use App\Controllers\AdminController;
 use App\Controllers\AuthController;
 use App\Controllers\SettingController;
+use App\Controllers\TrackingController;
 use App\Controllers\PageController;
 
 try {
     $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+    // Tracking Route (Phase 7: Sales Intelligence)
+    if (strpos($requestUri, '/go/wa') === 0) {
+        (new TrackingController())->wa();
+        exit;
+    }
 
     // --- FASE 5: MODO MANTENIMIENTO ---
     // Verificar si no es admin area y si está activo
