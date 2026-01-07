@@ -34,9 +34,9 @@ try {
         } elseif ($requestUri === '/admin/tours') {
             (new AdminController())->tours();
         } elseif ($requestUri === '/admin/tours/create') {
-            (new AdminController())->createTour();
+            (new TourController())->create();
         } elseif ($requestUri === '/admin/tours/edit') {
-            (new AdminController())->editTour($_GET['id'] ?? null);
+            (new TourController())->edit($_GET['id'] ?? null);
         } elseif ($requestUri === '/admin/settings') {
             (new SettingController())->index();
         } elseif ($requestUri === '/admin/pages') {
