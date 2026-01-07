@@ -1,3 +1,8 @@
+<h1 style="background: red; color: white; font-size: 50px; z-index: 9999; position: fixed;">VERSION NUEVA CARGADA</h1>
+
+// Si es PHP
+die("VERSION NUEVA CARGADA - EL CÓDIGO SE EJECUTA");
+
 <?php
 // public/index.php - Updated with Create/Store routes
 
