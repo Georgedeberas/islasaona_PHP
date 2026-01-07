@@ -131,18 +131,18 @@ class Tour
             ':price_adult' => $data['price_adult'],
             ':price_child' => $data['price_child'],
             ':duration' => $data['duration'],
-            ':includes' => is_array($data['includes']) ? json_encode($data['includes']) : $data['includes'],
-            ':not_included' => is_array($data['not_included']) ? json_encode($data['not_included']) : $data['not_included'],
-            ':display_style' => $data['display_style'],
-            ':is_active' => $data['is_active'],
+            ':includes' => is_array($data['includes'] ?? null) ? json_encode($data['includes']) : ($data['includes'] ?? '[]'),
+            ':not_included' => is_array($data['not_included'] ?? null) ? json_encode($data['not_included']) : ($data['not_included'] ?? '[]'),
+            ':display_style' => $data['display_style'] ?? 'classic',
+            ':is_active' => $data['is_active'] ?? 1,
             // SEO Fields
             ':seo_title' => $data['seo_title'] ?? $data['title'],
             ':seo_description' => $data['seo_description'] ?? $data['description_short'],
-            ':keywords' => $data['keywords'],
-            ':schema_type' => $data['schema_type'],
-            ':rating_score' => $data['rating_score'],
-            ':review_count' => $data['review_count'],
-            ':tour_highlights' => is_array($data['tour_highlights']) ? json_encode($data['tour_highlights']) : $data['tour_highlights']
+            ':keywords' => $data['keywords'] ?? '',
+            ':schema_type' => $data['schema_type'] ?? 'TouristTrip',
+            ':rating_score' => $data['rating_score'] ?? 4.8,
+            ':review_count' => $data['review_count'] ?? 0,
+            ':tour_highlights' => is_array($data['tour_highlights'] ?? null) ? json_encode($data['tour_highlights']) : ($data['tour_highlights'] ?? '[]')
         ];
 
         if ($stmt->execute($params)) {
