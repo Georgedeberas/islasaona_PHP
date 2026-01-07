@@ -17,7 +17,8 @@ $schema = [
     "description" => $seoDesc,
     "url" => $currentUrl,
     "image" => array_map(function ($img) {
-        return 'http://islasaona.mochilerosrd.com/' . $img['image_path'];
+        $safePath = ltrim($img['image_path'], '/');
+        return 'http://islasaona.mochilerosrd.com/' . $safePath;
     }, $images),
     "touristType" => ["AdventureTourism", "CulturalTourism", "FamilyTourism"],
     "itinerary" => [
@@ -96,13 +97,16 @@ require __DIR__ . '/../layout/header.php';
             $class = ($count == 1) ? 'col-span-2 row-span-2' : 'col-span-1 row-span-1 hidden md:block';
             if ($count > 5)
                 break;
+            // Sanitizar path de imagen para evitar doble slash // o rutas absolutas incorrectas
+            $safePath = ltrim($img['image_path'], '/');
+
             // Generar Alt dinámico según regla AEO 2026
-            $altText = !empty($img['description']) 
-                ? $img['description'] 
+            $altText = !empty($img['description'])
+                ? $img['description']
                 : $tour['title'] . " - Experiencia en República Dominicana foto " . $count;
             ?>
             <div class="<?= $class ?> relative h-full group">
-                <img src="/<?= $img['image_path'] ?>" alt="<?= htmlspecialchars($altText) ?>"
+                <img src="/<?= $safePath ?>" alt="<?= htmlspecialchars($altText) ?>"
                     class="w-full h-full object-cover hover:scale-105 transition duration-500 cursor-pointer">
             </div>
         <?php endforeach; ?>
