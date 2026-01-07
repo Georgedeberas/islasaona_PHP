@@ -333,80 +333,114 @@ if (isset($_GET['success'])): ?>
 </div>
 
 <!-- JS Logic -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // Toggle Specific Dates
     const freqSelect = document.getElementById('frequency_select');
     const dateContainer = document.getElementById('specific_dates_container');
     
     function toggleDates() {
-        if(freqSelect.value === 'specific') {
-            dateContainer.classList.remove('d-none');
-        } else {
-            dateContainer.classList.add('d-none');
+        if(freqSelect && dateContainer) {
+            if(freqSelect.value === 'specific') {
+                dateContainer.classList.remove('d-none');
+            } else {
+                dateContainer.classList.add('d-none');
+            }
         }
     }
-    freqSelect.addEventListener('change', toggleDates);
-    toggleDates(); // Init
+    if(freqSelect) {
+        freqSelect.addEventListener('change', toggleDates);
+        toggleDates(); // Init
+    }
 
-    // SMART PARSER
+    // --- SMART PARSER ULTRA ROBUSTO (V3) ---
+    function normalizeText(str) {
+        if(!str) return "";
+        // 1. Normalizar caracteres Unicode (Negritas matemáticas, etc) a ASCII simple
+        // Esto convierte "𝐂𝐎𝐒𝐓𝐎" -> "COSTO"
+        return str.normalize("NFKC").trim().toUpperCase();
+    }
+
     function runSmartParser() {
-        const text = document.getElementById('pasteArea').value;
-        if(!text) return;
+        const rawText = document.getElementById('pasteArea').value;
+        if(!rawText) return;
 
-        // Mapper de Keywords a IDs de Inputs
-        const map = {
-            'COSTO': 'input_cost',
-            'PRECIO': 'input_cost',
-            '𝐃𝐔𝐑𝐀𝐂𝐈𝐎𝐍': 'input_duration', 'DURACION': 'input_duration',
-            'FECHAS DISPONIBLES': 'input_dates',
-            'INCLUYE': 'input_includes', '✅ INCLUYE': 'input_includes',
-            'NO INCLUYE': 'input_not_included', '❌ NO INCLUYE': 'input_not_included',
-            'VISITAREMOS': 'input_visiting', 'LUGARES A VISITAR': 'input_visiting',
-            'PUNTOS DE SALIDA': 'input_departure', 'SALIDA': 'input_departure',
-            'PARQUEOS': 'input_parking',
-            'IMPORTANTE': 'input_important',
-            'QUE LLEVAR': 'input_what_to_bring'
-        };
+        // Mapa de Keywords (Normalizadas) -> ID del Input
+        // Usamos arrays para variantes. La clave es el identificador lógico.
+        const mappings = [
+            { id: 'input_cost', keys: ['COSTO', 'PRECIO', 'PRECIO:', 'COSTO:'] },
+            { id: 'input_duration', keys: ['DURACION', 'TIEMPO', 'DURACION:'] },
+            { id: 'input_dates', keys: ['FECHAS DISPONIBLES', 'FECHA', 'SALIDAS', 'DISPONIBILIDAD'] },
+            { id: 'input_includes', keys: ['INCLUYE', 'QUE INCLUYE', 'ESTE TOUR INCLUYE', '✅ INCLUYE'] },
+            { id: 'input_not_included', keys: ['NO INCLUYE', 'NO ESTA INCLUIDO', '❌ NO INCLUYE'] },
+            { id: 'input_visiting', keys: ['VISITAREMOS', 'LUGARES A VISITAR', 'ITINERARIO', '📍 VISITAREMOS'] },
+            { id: 'input_departure', keys: ['PUNTOS DE SALIDA', 'SALIDA', 'PUNTO DE ENCUENTRO', 'HORA DE SALIDA'] },
+            { id: 'input_parking', keys: ['PARQUEOS', 'PARQUEO', 'ESTACIONAMIENTO'] },
+            { id: 'input_important', keys: ['IMPORTANTE', 'NOTA', 'OBSERVACIONES', '⚠️ IMPORTANTE'] },
+            { id: 'input_what_to_bring', keys: ['QUE LLEVAR', 'RECOMENDACIONES', '🎒 QUE LLEVAR'] }
+        ];
 
-        // Lógica simple de split por líneas y detección de cabeceras
-        const lines = text.split('\n');
-        let currentField = null;
-        let buffer = '';
+        const lines = rawText.split('\n');
+        let currentInputId = null;
+        let buffer = [];
 
-        lines.forEach(line => {
-            const trimmed = line.trim().toUpperCase();
-            // Detectar si la línea es un header conocido
-            let matched = false;
-            for (const [key, targetId] of Object.entries(map)) {
-                if (trimmed.includes(key) && trimmed.length < 50) { // Headers suelen ser cortos
-                    // Si ya teníamos algo en buffer, guardarlo en el campo anterior
-                    if (currentField && map[currentField]) {
-                        appendToInput(map[currentField], buffer);
+        lines.forEach(originalLine => {
+            const cleanLine = normalizeText(originalLine);
+            
+            // Intentar detectar si esta linea es un encabezado conocido
+            let matchedId = null;
+
+            // Heurística: Un encabezado suele ser corto (menos de 60 caracteres)
+            if (cleanLine.length < 60) {
+                for (let group of mappings) {
+                    for (let key of group.keys) {
+                        // Verificamos si la linea EMPIEZA con la keyword o es IGUAL (tras limpieza)
+                        // Quitamos : y espacios al final para comparar "COSTO:" con "COSTO"
+                        const pureLine = cleanLine.replace(/[:.\-]/g, '').trim(); 
+                        if (pureLine === key || cleanLine.startsWith(key)) {
+                            matchedId = group.id;
+                            break;
+                        }
                     }
-                    // Nuevo bloque
-                    currentField = key;
-                    buffer = ''; // Reiniciar buffer
-                    matched = true;
-                    // Cheat: Si la linea tiene el valor ahí mismo (Ej: COSTO: $500), guardarlo
-                    const splitVal = line.split(/[:|-]/);
-                    if(splitVal.length > 1) {
-                         buffer += splitVal.slice(1).join(':').trim() + '\n';
-                    }
-                    break;
+                    if (matchedId) break;
                 }
             }
-            
-            if (!matched) {
-                if (currentField) {
-                    buffer += line + '\n';
+
+            if (matchedId) {
+                // Hemos encontrado un NUEVO encabezado.
+                // 1. Guardar lo que teníamos en el buffer en el input anterior
+                if (currentInputId && buffer.length > 0) {
+                    flushBuffer(currentInputId, buffer);
+                }
+                
+                // 2. Cambiar al nuevo input
+                currentInputId = matchedId;
+                buffer = []; 
+
+                // 3. Chequear si la misma línea tiene contenido (Ej: "Costo: $500")
+                // Si la línea es solo el header, no la guardamos. Si tiene contenido, guardamos el resto.
+                // Removemos el header de la linea original para guardar solo el valor.
+                // Pero es dificil saber exacto donde cortar. 
+                // Simple: Si la linea tiene ':', cortamos despues.
+                if (originalLine.includes(':')) {
+                    const parts = originalLine.split(':');
+                    if (parts.length > 1 && parts[1].trim().length > 0) {
+                        buffer.push(parts.slice(1).join(':').trim());
+                    }
+                }
+            } else {
+                // No es encabezado, es contenido del input actual
+                if (currentInputId) {
+                    // Solo agregar si no es línea vacía repetida
+                    if (originalLine.trim().length > 0) {
+                        buffer.push(originalLine.trim());
+                    }
                 }
             }
         });
 
-        // Flush last buffer
-        if (currentField && map[currentField]) {
-            appendToInput(map[currentField], buffer);
+        // Flush final
+        if (currentInputId && buffer.length > 0) {
+            flushBuffer(currentInputId, buffer);
         }
 
         // Cerrar modal
@@ -414,15 +448,16 @@ if (isset($_GET['success'])): ?>
         const modal = bootstrap.Modal.getInstance(modalEl);
         modal.hide();
         
-        alert('✨ Datos importados mágicamente. Revisa los campos.');
+        alert('✨ Texto procesado. Revisa los campos.');
     }
 
-    function appendToInput(id, content) {
+    function flushBuffer(id, lines) {
         const el = document.getElementById(id);
-        if(el) {
-            // Limpiar contenido previo si es duplicado o append? Mejor reemplazar clean
-            const cleanContent = content.trim();
-            if(cleanContent) el.value = cleanContent;
+        if (el) {
+            el.value = lines.join('\n');
+            // Auto-resize si fuera necesario
+            el.style.height = 'auto';
+            el.style.height = (el.scrollHeight) + 'px';
         }
     }
 </script>

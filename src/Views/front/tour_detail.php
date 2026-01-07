@@ -141,68 +141,137 @@ require __DIR__ . '/../layout/header.php';
 
 <div class="container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-12">
     <!-- Columna Izquierda: Información -->
+    <!-- Columna Izquierda: Información Extendida -->
     <div class="lg:col-span-2 space-y-8">
 
         <!-- Highlights AI Block -->
         <?php if (!empty($highlights)): ?>
             <div class="bg-indigo-50 border-l-4 border-secondary p-5 rounded-r">
                 <h3 class="font-bold text-secondary mb-2 flex items-center">
-                    ✨ Puntos Destacados (Highlights)
+                    ✨ Lo más destacado
                 </h3>
-                <ul class="grid grid-cols-1 gap-2">
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <?php foreach ($highlights as $hl): ?>
                         <li class="flex items-start text-sm text-gray-700">
-                            <span class="mr-2">🔹</span> <?= htmlspecialchars($hl) ?>
+                            <span class="mr-2 text-primary">★</span> <?= htmlspecialchars($hl) ?>
                         </li>
                     <?php endforeach; ?>
                 </ul>
             </div>
         <?php endif; ?>
 
+        <!-- Descripción General -->
         <div class="border-b border-gray-100 pb-8">
-            <h2 class="text-2xl font-bold mb-4 text-secondary">Lo que vivirás</h2>
+            <h2 class="text-2xl font-bold mb-4 text-secondary">Descripción de la Experiencia</h2>
             <div class="prose max-w-none text-gray-600 leading-relaxed">
                 <?= $tour['description_long'] ?>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-green-50 p-6 rounded-xl">
-                <h3 class="text-lg font-bold mb-4 text-green-800 flex items-center">
-                    ✅ Incluido
+        <!-- Nueva Sección Info Extendida -->
+
+        <!-- Bloque 1: Visitaremos (Itinerario) -->
+        <?php if (!empty($tour['info_visiting'])): ?>
+            <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                <h3 class="text-xl font-bold mb-3 text-blue-900 flex items-center">
+                    📍 Visitaremos
                 </h3>
-                <ul class="space-y-3">
-                    <?php foreach ($includes as $inc): ?>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-600 mr-2 mt-0.5" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
-                                </path>
-                            </svg>
-                            <span class="text-gray-700 text-sm"><?= htmlspecialchars($inc) ?></span>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
+                <p class="text-gray-700 whitespace-pre-line"><?= htmlspecialchars($tour['info_visiting']) ?></p>
+            </div>
+        <?php endif; ?>
+
+        <!-- Bloque 2: Logística (Salida, Parqueo, Fechas) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <?php if (!empty($tour['info_departure'])): ?>
+                <div class="bg-gray-50 p-5 rounded-lg">
+                    <h4 class="font-bold text-gray-900 mb-2">🚐 Puntos de Salida</h4>
+                    <p class="text-sm text-gray-600 whitespace-pre-line"><?= htmlspecialchars($tour['info_departure']) ?>
+                    </p>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($tour['info_dates_text'])): ?>
+                <div class="bg-gray-50 p-5 rounded-lg">
+                    <h4 class="font-bold text-gray-900 mb-2">📅 Fechas Disponibles</h4>
+                    <p class="text-sm text-gray-600 whitespace-pre-line"><?= htmlspecialchars($tour['info_dates_text']) ?>
+                    </p>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- Bloque 3: Incluye vs No Incluye -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-green-50 p-6 rounded-xl border border-green-100">
+                <h3 class="text-lg font-bold mb-4 text-green-800 flex items-center">
+                    ✅ Incluye
+                </h3>
+                <?php if (!empty($tour['info_includes'])): ?>
+                    <div class="text-gray-700 text-sm whitespace-pre-line leading-relaxed">
+                        <?= htmlspecialchars($tour['info_includes']) ?>
+                    </div>
+                <?php else: ?>
+                    <!-- Fallback legacy -->
+                    <ul class="space-y-3">
+                        <?php foreach ($includes as $inc): ?>
+                            <li class="flex items-start">
+                                <svg class="w-5 h-5 text-green-600 mr-2 mt-0.5" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+                                    </path>
+                                </svg>
+                                <span class="text-gray-700 text-sm"><?= htmlspecialchars($inc) ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
             </div>
 
-            <div class="bg-red-50 p-6 rounded-xl">
+            <div class="bg-red-50 p-6 rounded-xl border border-red-100">
                 <h3 class="text-lg font-bold mb-4 text-red-800 flex items-center">
-                    ❌ No Incluido
+                    ❌ No Incluye
                 </h3>
-                <ul class="space-y-3">
-                    <?php foreach ($notIncluded as $notin): ?>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-red-500 mr-2 mt-0.5" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            <span class="text-gray-600 text-sm"><?= htmlspecialchars($notin) ?></span>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
+                <?php if (!empty($tour['info_not_included'])): ?>
+                    <div class="text-gray-600 text-sm whitespace-pre-line leading-relaxed">
+                        <?= htmlspecialchars($tour['info_not_included']) ?>
+                    </div>
+                <?php else: ?>
+                    <!-- Fallback legacy -->
+                    <ul class="space-y-3">
+                        <?php foreach ($notIncluded as $notin): ?>
+                            <li class="flex items-start">
+                                <svg class="w-5 h-5 text-red-500 mr-2 mt-0.5" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                <span class="text-gray-600 text-sm"><?= htmlspecialchars($notin) ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
             </div>
         </div>
+
+        <!-- Bloque 4: Recomendaciones e Importante -->
+        <?php if (!empty($tour['info_what_to_bring']) || !empty($tour['info_important'])): ?>
+            <div class="space-y-6">
+                <?php if (!empty($tour['info_what_to_bring'])): ?>
+                    <div class="bg-orange-50 p-6 rounded-xl border border-orange-100">
+                        <h3 class="font-bold text-orange-900 mb-2">🎒 ¿Qué llevar?</h3>
+                        <p class="text-gray-700 whitespace-pre-line"><?= htmlspecialchars($tour['info_what_to_bring']) ?></p>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (!empty($tour['info_important'])): ?>
+                    <div class="bg-gray-100 p-6 rounded-xl border border-gray-200">
+                        <h3 class="font-bold text-gray-800 mb-2">⚠️ Importante - Política de Cancelación Hoy y Siempre</h3>
+                        <p class="text-gray-600 text-sm whitespace-pre-line"><?= htmlspecialchars($tour['info_important']) ?>
+                        </p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
     </div>
 
     <!-- Columna Derecha: Price Card (Desktop) -->
