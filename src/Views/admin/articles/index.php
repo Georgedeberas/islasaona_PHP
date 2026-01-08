@@ -9,11 +9,25 @@ require __DIR__ . '/../layout/sidebar.php';
 <div class="container-fluid p-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0 text-gray-800">📰 Blog & Noticias</h1>
-        <a href="/admin/articles/edit" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> Redactar Nuevo
+        <div>
+            <h2 class="h3 mb-0 fw-bold text-gray-800">Gestión de Contenidos</h2>
+            <p class="text-muted mb-0">Administra páginas estáticas y noticias.</p>
+        </div>
+        <a href="/admin/articles/edit" class="btn btn-primary fw-bold shadow-sm">
+            <i class="bi bi-plus-lg"></i> Redactar Artículo
         </a>
     </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills mb-4 gap-2">
+        <li class="nav-item">
+            <a class="nav-link bg-white text-secondary border" href="/admin/pages">📄 Páginas Estáticas</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active bg-primary text-white" aria-current="page" href="/admin/articles">📰 Blog &
+                Noticias</a>
+        </li>
+    </ul>
 
     <?php if (isset($_GET['deleted'])): ?>
         <div class="alert alert-success">Artículo eliminado correctamente.</div>

@@ -21,14 +21,8 @@
         </li>
         <li>
             <a href="/admin/pages"
-                class="nav-link text-white <?= strpos($_SERVER['REQUEST_URI'], '/admin/pages') !== false ? 'active bg-warning text-dark' : '' ?>">
-                📝 Contenidos (Páginas)
-            </a>
-        </li>
-        <li>
-            <a href="/admin/articles"
-                class="nav-link text-white <?= strpos($_SERVER['REQUEST_URI'], '/admin/articles') !== false ? 'active bg-warning text-dark' : '' ?>">
-                📰 Blog & Noticias
+                class="nav-link text-white <?= (strpos($_SERVER['REQUEST_URI'], '/admin/pages') !== false || strpos($_SERVER['REQUEST_URI'], '/admin/articles') !== false) ? 'active bg-warning text-dark' : '' ?>">
+                📝 Contenidos
             </a>
         </li>
         <li>
