@@ -25,7 +25,9 @@ class SettingController
             unset($data['submit']);
 
             // Manejo de Imagen Hero
-            if (isset($_FILES['home_hero_bg']) && !empty($_FILES['home_hero_bg']['name'])) {
+            if (isset($_POST['delete_hero_bg']) && $_POST['delete_hero_bg'] === '1') {
+                $data['home_hero_bg'] = ''; // Limpiar referencia en BD
+            } elseif (isset($_FILES['home_hero_bg']) && !empty($_FILES['home_hero_bg']['name'])) {
                 $file = [
                     'tmp_name' => $_FILES['home_hero_bg']['tmp_name'],
                     'name' => $_FILES['home_hero_bg']['name'],
@@ -39,6 +41,9 @@ class SettingController
                     $data['home_hero_bg'] = 'assets/img/' . $newBg;
                 }
             }
+
+            // Cleanup: remove auxiliary fields
+            unset($data['delete_hero_bg']);
 
             // Manejo de Arrays (Select Multiple)
             if (isset($data['home_featured_tours']) && is_array($data['home_featured_tours'])) {

@@ -36,42 +36,52 @@ if (!empty($tours) && is_array($tours)) {
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
-    <!-- HERO SECTION -->
-    <div class="relative h-[80vh] flex items-center justify-center overflow-hidden bg-gray-900">
+    <!-- HERO SECTION V2 (Premium) -->
+    <div class="relative h-[85vh] flex items-center justify-center overflow-hidden bg-gray-900">
         <?php
         $heroImg = !empty($conf['home_hero_bg']) ? '/' . $conf['home_hero_bg'] : '/assets/img/placeholders/gray-landscape.png';
+        // Width Control
+        $bgWidth = !empty($conf['home_hero_bg_width']) ? $conf['home_hero_bg_width'] . '%' : '100%';
         ?>
-        <div class="absolute inset-0 z-0 select-none">
-            <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-black/30 z-10"></div>
-            <img src="<?= $heroImg ?>" class="w-full h-full object-cover animate-fade-in opacity-90">
+
+        <!-- Background Image Container -->
+        <div class="absolute inset-0 z-0 flex items-center justify-center bg-black">
+            <div class="relative h-full overflow-hidden transition-all duration-700 ease-in-out"
+                style="width: <?= $bgWidth ?>;">
+                <div class="absolute inset-0 bg-black/40 z-10"></div> <!-- Overlay -->
+                <?php if ($heroImg): ?>
+                    <img src="<?= $heroImg ?>" class="w-full h-full object-cover opacity-90 animate-fade-in">
+                <?php endif; ?>
+            </div>
         </div>
 
-        <div class="relative z-20 text-center text-white px-4 max-w-5xl mx-auto">
-            <div class="mb-6 animate-fade-in-up" style="animation-delay: 0.1s;">
+        <div
+            class="relative z-20 text-center text-white px-4 max-w-4xl mx-auto flex flex-col items-center justify-center h-full pb-20">
+            <!-- Supra Title -->
+            <div class="mb-4 animate-fade-in-up" style="animation-delay: 0.1s;">
                 <span
-                    class="inline-block py-1.5 px-5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-bold tracking-widest uppercase text-shadow-sm">
-                    <?= htmlspecialchars($conf['home_hero_subtitle'] ?? 'Vive la Aventura') ?>
+                    class="inline-block py-1.5 px-6 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-xs md:text-sm font-bold tracking-[0.3em] uppercase text-shadow-sm text-gray-200">
+                    <?= htmlspecialchars($conf['home_hero_supra_title'] ?? 'DESCUBRE EL PARAÍSO') ?>
                 </span>
             </div>
 
-            <h1 class="text-5xl md:text-7xl font-extrabold mb-8 font-heading leading-tight drop-shadow-2xl animate-fade-in-up"
+            <!-- Main Title Split -->
+            <h1 class="flex flex-col items-center justify-center gap-0 mb-6 drop-shadow-2xl animate-fade-in-up"
                 style="animation-delay: 0.2s;">
-                <?= htmlspecialchars($conf['home_hero_title'] ?? 'Explora Isla Saona') ?>
+                <span class="text-4xl md:text-6xl font-bold font-heading leading-tight tracking-tight">
+                    <?= htmlspecialchars($conf['home_hero_title'] ?? 'VIVE LA EXPERIENCIA') ?>
+                </span>
+                <span
+                    class="text-5xl md:text-7xl font-extrabold font-heading text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-300 leading-none mt-2">
+                    <?= htmlspecialchars($conf['home_hero_title_2'] ?? 'ISLA SAONA') ?>
+                </span>
             </h1>
 
-            <?php if (!empty($conf['home_hero_cta_text'])): ?>
-                <div class="animate-fade-in-up" style="animation-delay: 0.3s;">
-                    <a href="<?= htmlspecialchars($conf['home_hero_cta_link'] ?? '#tours') ?>"
-                        class="group inline-flex items-center gap-3 bg-primary hover:bg-primary-dark text-white text-lg font-bold py-4 px-10 rounded-full transition-all transform hover:scale-105 shadow-[0_10px_40px_rgba(37,211,102,0.4)]">
-                        <span><?= htmlspecialchars($conf['home_hero_cta_text']) ?></span>
-                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none"
-                            stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                        </svg>
-                    </a>
-                </div>
-            <?php endif; ?>
+            <!-- Subtitle/Description -->
+            <p class="text-lg md:text-xl text-gray-200 font-light italic max-w-2xl leading-relaxed animate-fade-in-up"
+                style="animation-delay: 0.3s;">
+                <?= nl2br(htmlspecialchars($conf['home_hero_subtitle'] ?? 'La aventura que estabas esperando. Playas vírgenes, fiesta en catamarán y recuerdos inolvidables con Mochileros RD.')) ?>
+            </p>
         </div>
     </div>
 

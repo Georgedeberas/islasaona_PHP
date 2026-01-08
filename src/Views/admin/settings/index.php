@@ -156,46 +156,100 @@
                                 </div>
                             </div>
 
-                            <!-- TAB 2: HOME HERO -->
+                            <!-- TAB 2: HOME HERO V2 -->
                             <div class="tab-pane fade" id="tab-home-hero">
                                 <div class="row">
-                                    <div class="col-md-5">
-                                        <label class="form-label fw-bold">Imagen de Fondo</label>
-                                        <div
-                                            class="ratio ratio-16x9 bg-secondary rounded mb-2 overflow-hidden position-relative group">
-                                            <img src="/<?= $val('home_hero_bg') ?>"
-                                                class="object-fit-cover w-100 h-100">
-                                            <div
-                                                class="position-absolute bottom-0 start-0 bg-dark text-white px-2 py-1 small opacity-75">
-                                                Actual</div>
+                                    <div class="col-md-5 border-end">
+                                        <h6 class="text-primary fw-bold mb-3"><i class="fas fa-image me-2"></i>Gestión
+                                            de Imagen</h6>
+
+                                        <!-- Image Preview with Controls -->
+                                        <div class="card shadow-sm mb-3">
+                                            <div class="card-body p-2 text-center bg-light">
+                                                <?php if (!empty($val('home_hero_bg'))): ?>
+                                                    <div class="ratio ratio-16x9 rounded overflow-hidden mb-2 border">
+                                                        <img src="/<?= $val('home_hero_bg') ?>" class="object-fit-cover">
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span class="badge bg-success">Imagen Activa</span>
+                                                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                                            onclick="if(confirm('¿Borrar imagen?')) { document.getElementById('delete_hero_bg').value='1'; this.form.submit(); }">
+                                                            <i class="fas fa-trash-alt"></i> Eliminar
+                                                        </button>
+                                                        <input type="hidden" name="delete_hero_bg" id="delete_hero_bg"
+                                                            value="0">
+                                                    </div>
+                                                <?php else: ?>
+                                                    <div class="py-4 text-muted border rounded border-dashed">
+                                                        <i class="fas fa-image fa-2x mb-2"></i><br>
+                                                        Sin imagen asignada
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
+
+                                        <!-- Width Control -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold small">Ancho de Imagen (%)</label>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <input type="range" class="form-range" min="50" max="100" step="5"
+                                                    name="home_hero_bg_width"
+                                                    value="<?= !empty($val('home_hero_bg_width')) ? $val('home_hero_bg_width') : '100' ?>"
+                                                    oninput="document.getElementById('widthVal').innerText = this.value + '%'">
+                                                <span id="widthVal"
+                                                    class="badge bg-secondary"><?= !empty($val('home_hero_bg_width')) ? $val('home_hero_bg_width') : '100' ?>%</span>
+                                            </div>
+                                            <div class="form-text small"> Ajusta qué tanto espacio ocupa la imagen.
+                                            </div>
+                                        </div>
+
+                                        <!-- File Upload -->
+                                        <label class="form-label fw-bold small">Subir Nueva / Reemplazar</label>
                                         <input type="file" name="home_hero_bg" class="form-control" accept="image/*">
-                                        <div class="form-text small">Se redimensionará y convertirá a WebP
-                                            automáticamente.</div>
                                     </div>
-                                    <div class="col-md-7">
+
+                                    <div class="col-md-7 ps-md-4">
+                                        <h6 class="text-primary fw-bold mb-3"><i
+                                                class="fas fa-heading me-2"></i>Contenido Textual</h6>
+
+                                        <!-- Supra Title -->
                                         <div class="mb-3">
-                                            <label class="form-label fw-bold">Título Principal (H1)</label>
-                                            <input type="text" name="home_hero_title"
-                                                class="form-control form-control-lg fw-bold"
-                                                value="<?= $val('home_hero_title') ?>">
+                                            <label class="form-label small text-muted text-uppercase fw-bold">Supra
+                                                Título (Arriba)</label>
+                                            <input type="text" name="home_hero_supra_title" class="form-control"
+                                                placeholder="Ej: DESCUBRE EL PARAÍSO"
+                                                value="<?= $val('home_hero_supra_title') ?>">
                                         </div>
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Subtítulo</label>
-                                            <textarea name="home_hero_subtitle" class="form-control"
-                                                rows="2"><?= $val('home_hero_subtitle') ?></textarea>
-                                        </div>
-                                        <div class="row g-2">
+
+                                        <!-- Main Title Split -->
+                                        <div class="row g-2 mb-3">
                                             <div class="col-md-6">
-                                                <label class="form-label fw-bold">Texto Botón</label>
-                                                <input type="text" name="home_hero_cta_text" class="form-control"
-                                                    value="<?= $val('home_hero_cta_text') ?>">
+                                                <label class="form-label fw-bold">Título Parte 1 (Blanco)</label>
+                                                <input type="text" name="home_hero_title"
+                                                    class="form-control form-control-lg fw-bold"
+                                                    placeholder="Ej: VIVE LA EXPERIENCIA"
+                                                    value="<?= $val('home_hero_title') ?>">
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label fw-bold">Enlace Botón</label>
-                                                <input type="text" name="home_hero_cta_link" class="form-control"
-                                                    value="<?= $val('home_hero_cta_link') ?>">
+                                                <label class="form-label fw-bold text-info">Título Parte 2
+                                                    (Destacado)</label>
+                                                <input type="text" name="home_hero_title_2"
+                                                    class="form-control form-control-lg fw-bold border-info"
+                                                    placeholder="Ej: ISLA SAONA"
+                                                    value="<?= $val('home_hero_title_2') ?>">
                                             </div>
+                                        </div>
+
+                                        <!-- Subtitle -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Subtítulo / Descripción</label>
+                                            <textarea name="home_hero_subtitle" class="form-control" rows="3"
+                                                placeholder="La aventura que estabas esperando..."><?= $val('home_hero_subtitle') ?></textarea>
+                                        </div>
+
+                                        <div class="alert alert-info py-2 small">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Los botones de acción han sido desactivados para este diseño.
                                         </div>
                                     </div>
                                 </div>
