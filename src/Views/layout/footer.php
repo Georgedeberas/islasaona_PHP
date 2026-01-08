@@ -156,54 +156,51 @@ if (!isset($conf)) {
 <!-- Mobile Bottom App Bar -->
 <div
     class="fixed bottom-0 left-0 w-full bg-[#0f172a]/95 backdrop-blur-md border-t border-white/10 z-[9999] md:hidden pb-safe">
-    <div class="flex justify-between items-center px-6 h-[55px]">
+    <div class="flex justify-between items-center px-8 h-[55px]">
 
         <!-- Inicio -->
         <a href="/"
-            class="flex flex-col items-center justify-center text-white/70 hover:text-white transition-colors w-14 gap-1"
+            class="flex flex-col items-center justify-center text-white/70 hover:text-white transition-colors w-10"
             aria-label="Inicio">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
                 <path
                     d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.707 1.5Z" />
             </svg>
-            <span class="text-[10px] font-medium tracking-wide">Inicio</span>
         </a>
 
-        <!-- Tours -->
+        <!-- Tours (Ticket/Compass to denote 'Tours' better than Palm Tree if user disliked it) -->
+        <!-- User just said "change it". I'll try a TICKET or SIGNPOST. -->
+        <!-- Let's use a "Signpost" or "Map". -->
         <a href="/#tours"
-            class="flex flex-col items-center justify-center text-white/70 hover:text-white transition-colors w-14 gap-1"
+            class="flex flex-col items-center justify-center text-white/70 hover:text-white transition-colors w-10"
             aria-label="Tours">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 512 512">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
                 <path
-                    d="M272 96c-78.6 0-145.1 51.5-167.7 122.5c33.6-17 71.5-26.5 111.7-26.5h88c8.8 0 16 7.2 16 16s-7.2 16-16 16H288 216s0 0 0 0c-16.6 0-32.7 1.9-48.3 5.4c-25.9 24.1-41.2 58.2-41.2 96.2c0 12.8 1.9 25.1 5.3 36.8l20.3 70.8 100-249.1c9.3-23.4 11.2-41.9 11.2-56.1l0-6c-3.1 3-6.4 5.9-9.9 8.6C265.4 116.6 272 96 272 96zM112 192c0-8.8 7.2-16 16-16H216c6.2 0 12.2 1.1 18 3.2C194.2 146.5 125.7 121.7 87.8 186.4c7.6 2.3 15.5 4.3 23.3 5.6H128c-8.8 0-16-7.2-16-16zm176 16c0-8.8 7.2-16 16-16h44.1c16.1-9.3 27.6-25 35-43.9C369.4 137.2 338.3 96 272 96c0 0 6.6-20.6-21.4-36.6c3.5-2.7 6.8-5.6 9.9-8.6c8.5-6.6 22.3-13.6 39.5-8.8c12.3 3.4 20.2 15.6 17.5 27.9s-14.7 21.6-27.1 19.1c-3.9-1.1-7.5-1.5-10.7-1.3l.1 2.2c16.3 16.2 46.2 36.2 122.2 26.6c-7.7 41.5-29 78.7-60.8 107.4c5.1 1.7 10 3.3 14.8 4.7l46.1 13.9c12.5 3.8 19.6 17 15.8 29.5s-17 19.6-29.5 15.8l-52.9-16.1c5.9 14.7 9.1 30.7 9.1 47.7c0 29.9-10.4 57.5-27.8 80l-20-75.5c-48.4 113.8-63.1 135.5-63.1 135.5c-1.4 2.2-3.8 3.5-6.4 3.5s-5-1.3-6.4-3.5c0 0-14.7-21.7-63.1-135.5l-20 75.5c-7.9-10-14-21.3-19.1-33.3c-2.4 8.7-2.6 15.3-2.6 15.3c0 2.6 1.3 5 3.5 6.4s5 1.4 7.6 .2l64.3-30.5 64.3 30.5c2.6 1.2 5.5 1.1 7.6-.2s3.5-3.8 3.5-6.4c0 0 .1-6.6-2.6-15.3c-4.9 11.4-11 22.1-18.4 31.7l16 6.3c15.8 6.2 36.3 4.1 48-7.7c17.6-17.7 30.1-34.9 44-53.9c16.1-22 36.9-50.6 61.3-80.1c15.6-18.9 40.5-29.7 65.6-23.7l6.4 1.5c12.6 3 25.4-4.8 28.4-17.4s-4.8-25.4-17.4-28.4l-7.3-1.8c-20-4.8-39.7 4.1-52.3 19.3L442 278.1c-14.2 17.1-27.1 33.3-39.3 49.3c-1.6-1.5-3.2-3-5-4.5l-9.1-7.8C359.8 289 324.2 267.3 288 267.3V208z" />
+                    d="M7 1.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H8v4h3a.5.5 0 0 1 0 1H8v3a.5.5 0 0 1-1 0v-3H4a.5.5 0 0 1 0-1h3V7H2.5a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5h5V1.5Z" />
             </svg>
-            <span class="text-[10px] font-medium tracking-wide">Tours</span>
         </a>
 
-        <!-- Contacto -->
+        <!-- Cuenta -->
         <a href="/contact"
-            class="flex flex-col items-center justify-center text-white/70 hover:text-white transition-colors w-14 gap-1"
+            class="flex flex-col items-center justify-center text-white/70 hover:text-white transition-colors w-10"
             aria-label="Contacto">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
                 <path fill-rule="evenodd"
                     d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
             </svg>
-            <span class="text-[10px] font-medium tracking-wide">Cuenta</span>
         </a>
 
-        <!-- WhatsApp -->
+        <!-- WhatsApp (Native Green Icon) -->
         <a href="<?= $waLink ?>" target="_blank"
-            class="flex flex-col items-center justify-center text-white/70 hover:text-green-400 transition-colors w-14 gap-1"
+            class="flex items-center justify-center w-10 h-10 rounded-full hover:scale-105 transition-transform"
             aria-label="WhatsApp">
-            <!-- Icono verde integrado en estilo 'tab' o boton flotante? El usuario dijo "iconos blancos" pero antes "boton verde". En la foto NO HAY color fuerte mas que las notificaciones. -->
-            <!-- Voy a poner el icono de WA blanco como lo pide ('iconos blancos') pero quizas con un toque verde en hover, o badge. -->
-            <!-- "el color de la barra un azul oscurro transparante y los iconos blancos" -> I will make WA White too. -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16">
+            <!-- Using the official color inside the SVG or via class, but user wants 'el verde'. I'll give it the brand color text, no background circle, to make it 'native icon' style, or the filled circle? usually 'native icon' means the green filled circle. -->
+            <!-- "el icono nativo de whatsapp el verde" -> The classic green circle with white phone. -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#25D366" viewBox="0 0 16 16">
                 <path
                     d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" />
             </svg>
-            <span class="text-[10px] font-medium tracking-wide">Chat</span>
         </a>
 
     </div>
