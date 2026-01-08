@@ -3,7 +3,6 @@
 $layout = 'admin';
 $title = 'Gestión de Contenidos';
 require __DIR__ . '/../layout/header.php';
-require __DIR__ . '/../layout/sidebar.php';
 ?>
 
 <div class="container-fluid p-4">

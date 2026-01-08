@@ -4,7 +4,6 @@ $layout = 'admin'; // trigger admin layout
 $title = 'Centro de Mando';
 
 require __DIR__ . '/layout/header.php';
-require __DIR__ . '/layout/sidebar.php';
 
 // Mock Stats (In real implementation, these come from Controller)
 // Ensure variables are set if not passed
