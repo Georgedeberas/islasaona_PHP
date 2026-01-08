@@ -30,6 +30,14 @@
                     <form method="POST" action="/admin/settings" enctype="multipart/form-data">
 
                         <?php
+                        // Construir mapa de settings para acceso fácil por clave
+                        $settingsMap = [];
+                        if (isset($settings) && is_array($settings)) {
+                            foreach ($settings as $s) {
+                                $settingsMap[$s['setting_key']] = $s;
+                            }
+                        }
+
                         $val = function ($k) use ($settingsMap) {
                             return htmlspecialchars($settingsMap[$k]['setting_value'] ?? '');
                         };

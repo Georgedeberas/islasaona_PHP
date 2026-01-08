@@ -43,18 +43,21 @@ class SettingController
             // Manejo de Arrays (Select Multiple)
             if (isset($data['home_featured_tours']) && is_array($data['home_featured_tours'])) {
                 $data['home_featured_tours'] = json_encode($data['home_featured_tours']);
-            } else {
-                // Si no se envía nada (checkboxes desactivados o select vacío), hay que ver
-                // Para booleanos (switches), si no vienen en POST, seteamos '0' SOLO si estaban en groups
-                // Pero updateBatch itera sobre lo que recibe. 
-                // Hack: Forzar envío de '0' para switches en el view usando hidden inputs o manejandolo aqui.
-                // Por simplicidad, asumiremos que el form envía todo o manejaremos los keys específicos.
-                $switches = ['home_show_why', 'home_show_welcome'];
-                foreach ($switches as $s) {
-                    if (!isset($data[$s]))
-                        $data[$s] = '0';
+            }
+
+            // Manejo de Switches (Booleanos)
+            // Para checkboxes no marcados, el navegador no envía nada, así que forzamos '0'
+            $switches = ['home_show_why', 'home_show_welcome', 'maintenance_mode'];
+            foreach ($switches as $s) {
+                if (!isset($data[$s])) {
+                    $data[$s] = '0';
                 }
             }
+
+            // DEBUG LOGGING
+            $logMsg = "POST Update: " . date('Y-m-d H:i:s') . "\n";
+            $logMsg .= print_r($data, true);
+            file_put_contents(__DIR__ . '/../../debug_settings_log.txt', $logMsg, FILE_APPEND);
 
             $settingModel->updateBatch($data);
             header('Location: /admin/settings?saved=1');
