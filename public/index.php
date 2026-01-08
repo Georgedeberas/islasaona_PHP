@@ -68,6 +68,12 @@ try {
         } // NEW
         elseif ($requestUri === '/admin/pages/edit') {
             (new PageController())->edit();
+        } elseif ($requestUri === '/admin/articles') {
+            (new \App\Controllers\ArticleController())->adminIndex();
+        } elseif ($requestUri === '/admin/articles/edit') {
+            (new \App\Controllers\ArticleController())->edit();
+        } elseif ($requestUri === '/admin/articles/delete') {
+            (new \App\Controllers\ArticleController())->delete($_GET['id'] ?? null);
         } else {
             header('Location: /admin/dashboard');
         }
@@ -78,6 +84,10 @@ try {
     if ($requestUri === '/' || $requestUri === '/index.php') {
         $home = new HomeController();
         $home->index();
+    } elseif ($requestUri === '/blog') {
+        (new \App\Controllers\ArticleController())->index();
+    } elseif (preg_match('#^/blog/([\w-]+)$#', $requestUri, $matches)) {
+        (new \App\Controllers\ArticleController())->show($matches[1]);
     } elseif (preg_match('#^/tour/([\w-]+)$#', $requestUri, $matches)) {
         $tourController = new TourController();
         $tourController->detail($matches[1]);

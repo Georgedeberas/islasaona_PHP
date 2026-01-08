@@ -26,6 +26,12 @@
             </a>
         </li>
         <li>
+            <a href="/admin/articles"
+                class="nav-link text-white <?= strpos($_SERVER['REQUEST_URI'], '/admin/articles') !== false ? 'active bg-warning text-dark' : '' ?>">
+                📰 Blog & Noticias
+            </a>
+        </li>
+        <li>
             <a href="/admin/settings"
                 class="nav-link text-white <?= strpos($_SERVER['REQUEST_URI'], '/admin/settings') !== false ? 'active bg-warning text-dark' : '' ?>">
                 ⚙️ Configuración

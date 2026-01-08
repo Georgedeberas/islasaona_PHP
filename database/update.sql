@@ -1,0 +1,3 @@
+-- Archivo único para actualizaciones de base de datos pendientes
+-- Agregar aquí sentencias SQL (ALTER, CREATE, INSERT)
+-- Limpiar este archivo después de consolidar en schema.sql
