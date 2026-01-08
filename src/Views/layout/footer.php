@@ -159,38 +159,34 @@ $waMessage = "Hola! Quiero información sobre los tours.";
 $waLink = "https://wa.me/" . preg_replace('/[^0-9]/', '', $waNumber) . "?text=" . urlencode($waMessage);
 ?>
 
-<!-- WhatsApp Floating Button -->
-<a href="<?= $waLink ?>" target="_blank"
-    class="fixed bottom-24 right-4 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:scale-110 transition-transform duration-300 animate-bounce-slow flex items-center justify-center w-16 h-16 md:bottom-8 md:right-8">
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-whatsapp"
-        viewBox="0 0 16 16">
-        <path
-            d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" />
-    </svg>
-</a>
-
-<!-- Mobile Bottom Navigation Bar -->
+<!-- Mobile Bottom Dock (Apple Style) -->
 <div
-    class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 z-40 md:hidden flex justify-around py-3 pb-5 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
-    <a href="/"
-        class="flex flex-col items-center text-gray-500 hover:text-primary active:text-primary transition-colors">
-        <span class="text-2xl mb-1">🏠</span>
-        <span class="text-[10px] font-bold uppercase">Inicio</span>
-    </a>
-    <a href="/#tours"
-        class="flex flex-col items-center text-gray-500 hover:text-primary active:text-primary transition-colors">
-        <span class="text-2xl mb-1">🏝️</span>
-        <span class="text-[10px] font-bold uppercase">Tours</span>
-    </a>
-    <a href="/blog"
-        class="flex flex-col items-center text-gray-500 hover:text-primary active:text-primary transition-colors">
-        <span class="text-2xl mb-1">📰</span>
-        <span class="text-[10px] font-bold uppercase">Blog</span>
-    </a>
-    <a href="/contact"
-        class="flex flex-col items-center text-gray-500 hover:text-primary active:text-primary transition-colors">
-        <span class="text-2xl mb-1">📞</span>
-        <span class="text-[10px] font-bold uppercase">Contacto</span>
+    class="fixed bottom-6 left-6 right-6 h-16 bg-white/90 backdrop-blur-xl border border-white/40 z-50 md:hidden rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-between px-6 animate-fade-in-up">
+
+    <!-- Left Group -->
+    <div class="flex items-center gap-8">
+        <a href="/" class="text-gray-400 function-link hover:text-black transition-colors" aria-label="Inicio">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" viewBox="0 0 16 16">
+                <path
+                    d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.707 1.5Z" />
+            </svg>
+        </a>
+        <a href="/#tours" class="text-gray-400 function-link hover:text-black transition-colors" aria-label="Tours">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" viewBox="0 0 16 16">
+                <path
+                    d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm.25 10.574l.951 3.55a.5.5 0 0 0 .964-.257l-.951-3.55a.5.5 0 0 0-.964.257zm-3.5-2.285l-1.927 3.21a.5.5 0 1 0 .857.514l1.927-3.21a.5.5 0 1 0-.857-.514zm9.431-3.715a.5.5 0 0 0-.693-.16l-3.21 1.927a.5.5 0 1 0 .514.857l3.21-1.927a.5.5 0 0 0 .179-.697z" />
+                <path d="M8 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
+            </svg>
+        </a>
+    </div>
+
+    <!-- Right: WhatsApp Button (Integrated) -->
+    <a href="<?= $waLink ?>" target="_blank"
+        class="flex items-center justify-center w-12 h-12 bg-[#25D366] text-white rounded-full shadow-lg hover:scale-105 transition-transform">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+            <path
+                d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" />
+        </svg>
     </a>
 </div>
 
