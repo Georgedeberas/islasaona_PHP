@@ -188,19 +188,20 @@
                                             </div>
                                         </div>
 
-                                        <!-- Width Control -->
+                                        <!-- Height Control (Stored in Width column) -->
                                         <div class="mb-3">
-                                            <label class="form-label fw-bold small">Ancho de Imagen (%)</label>
+                                            <label class="form-label fw-bold small">Altura de Portada (%
+                                                Pantalla)</label>
                                             <div class="d-flex align-items-center gap-2">
-                                                <input type="range" class="form-range" min="50" max="100" step="5"
+                                                <input type="range" class="form-range" min="40" max="100" step="5"
                                                     name="home_hero_bg_width"
                                                     value="<?= !empty($val('home_hero_bg_width')) ? $val('home_hero_bg_width') : '100' ?>"
-                                                    oninput="document.getElementById('widthVal').innerText = this.value + '%'">
-                                                <span id="widthVal"
-                                                    class="badge bg-secondary"><?= !empty($val('home_hero_bg_width')) ? $val('home_hero_bg_width') : '100' ?>%</span>
+                                                    oninput="document.getElementById('dimVal').innerText = this.value + 'vh'">
+                                                <span id="dimVal"
+                                                    class="badge bg-secondary"><?= !empty($val('home_hero_bg_width')) ? $val('home_hero_bg_width') : '100' ?>vh</span>
                                             </div>
-                                            <div class="form-text small"> Ajusta qué tanto espacio ocupa la imagen.
-                                            </div>
+                                            <div class="form-text small"> Ajusta la altura vertical de la sección (40vh
+                                                - 100vh).</div>
                                         </div>
 
                                         <!-- File Upload -->

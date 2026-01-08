@@ -37,17 +37,17 @@ if (!empty($tours) && is_array($tours)) {
 
 <main>
     <!-- HERO SECTION V2 (Premium) -->
-    <div class="relative h-[85vh] flex items-center justify-center overflow-hidden bg-gray-900">
-        <?php
-        $heroImg = !empty($conf['home_hero_bg']) ? '/' . $conf['home_hero_bg'] : '/assets/img/placeholders/gray-landscape.png';
-        // Width Control
-        $bgWidth = !empty($conf['home_hero_bg_width']) ? $conf['home_hero_bg_width'] . '%' : '100%';
-        ?>
+    <!-- Controlled by Admin Panel Height (formerly width) -->
+    <?php
+    $heroImg = !empty($conf['home_hero_bg']) ? '/' . $conf['home_hero_bg'] : '/assets/img/placeholders/gray-landscape.png';
+    $bgHeight = !empty($conf['home_hero_bg_width']) ? $conf['home_hero_bg_width'] . 'vh' : '85vh';
+    ?>
+    <div class="relative flex items-center justify-center overflow-hidden bg-gray-900 transition-all duration-700"
+        style="height: <?= $bgHeight ?>;">
 
         <!-- Background Image Container -->
         <div class="absolute inset-0 z-0 flex items-center justify-center bg-black">
-            <div class="relative h-full overflow-hidden transition-all duration-700 ease-in-out"
-                style="width: <?= $bgWidth ?>;">
+            <div class="relative w-full h-full overflow-hidden">
                 <div class="absolute inset-0 bg-black/40 z-10"></div> <!-- Overlay -->
                 <?php if ($heroImg): ?>
                     <img src="<?= $heroImg ?>" class="w-full h-full object-cover opacity-90 animate-fade-in">
