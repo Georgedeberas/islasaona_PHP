@@ -155,11 +155,11 @@ if (!isset($conf)) {
 
 <!-- Mobile Bottom App Bar (Sticky & Modern) -->
 <div
-    class="fixed bottom-0 left-0 w-full bg-[#0f172a]/90 backdrop-blur-md border-t border-white/5 z-[9999] md:hidden pb-safe rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.2)]">
+    class="fixed bottom-0 left-0 w-full bg-[#002f6c]/60 backdrop-blur-md border-t border-white/5 z-[9999] md:hidden pb-safe rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.2)]">
     <div class="flex justify-between items-center px-8 h-[55px]">
 
         <!-- Inicio -->
-        <a href="/" class="flex items-center justify-center text-white/70 hover:text-white transition-opacity w-10"
+        <a href="/" class="flex items-center justify-center text-[#ff8c00] hover:text-white transition-opacity w-10"
             aria-label="Inicio">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
                 <path
@@ -169,7 +169,7 @@ if (!isset($conf)) {
 
         <!-- Tours -->
         <a href="/#tours"
-            class="flex items-center justify-center text-white/70 hover:text-white transition-opacity w-10"
+            class="flex items-center justify-center text-[#ff8c00] hover:text-white transition-opacity w-10"
             aria-label="Tours">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
                 <path
@@ -179,7 +179,7 @@ if (!isset($conf)) {
 
         <!-- Cuenta -->
         <a href="/contact"
-            class="flex items-center justify-center text-white/70 hover:text-white transition-opacity w-10"
+            class="flex items-center justify-center text-[#ff8c00] hover:text-white transition-opacity w-10"
             aria-label="Contacto">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
