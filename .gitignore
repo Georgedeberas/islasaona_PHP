@@ -3,3 +3,4 @@ public/assets/uploads/*
 !public/assets/uploads/.gitkeep
 /vendor
 .DS_Store
+src/Config/config.php

@@ -12,12 +12,18 @@ class Database
     public static function getConnection()
     {
         if (self::$conn === null) {
-            self::loadEnv();
 
-            $host = $_ENV['DB_HOST'] ?? 'localhost';
-            $db_name = $_ENV['DB_NAME'] ?? '';
-            $username = $_ENV['DB_USER'] ?? '';
-            $password = $_ENV['DB_PASS'] ?? '';
+            // Cargar configuración nativa (PHP Array)
+            $configPath = __DIR__ . '/config.php';
+            if (!file_exists($configPath)) {
+                die("<h1>Error de Configuración</h1><p>Archivo config.php no encontrado.</p>");
+            }
+            $config = require $configPath;
+
+            $host = $config['DB_HOST'] ?? 'localhost';
+            $db_name = $config['DB_NAME'] ?? '';
+            $username = $config['DB_USER'] ?? '';
+            $password = $config['DB_PASS'] ?? '';
 
             try {
                 $dsn = "mysql:host=" . $host . ";dbname=" . $db_name . ";charset=utf8mb4";
@@ -37,33 +43,5 @@ class Database
             }
         }
         return self::$conn;
-    }
-
-    private static function loadEnv()
-    {
-        if (isset($_ENV['DB_HOST']))
-            return; // Already loaded
-
-        $path = __DIR__ . '/../../.env';
-        if (!file_exists($path))
-            return;
-
-        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        foreach ($lines as $line) {
-            if (strpos(trim($line), '#') === 0)
-                continue;
-
-            if (strpos($line, '=') !== false) {
-                list($name, $value) = explode('=', $line, 2);
-                $name = trim($name);
-                $value = trim($value);
-
-                if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
-                    putenv(sprintf('%s=%s', $name, $value));
-                    $_ENV[$name] = $value;
-                    $_SERVER[$name] = $value;
-                }
-            }
-        }
     }
 }
