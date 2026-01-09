@@ -12,6 +12,23 @@ Existe un rol de **Supervisor Técnico** en este proyecto.
 
 ---
 
+### 🔥 HERRAMIENTA DE CONTROL REMOTO (MCP BRIDGE)
+Tienes acceso a un "Puente MCP" para gestionar el servidor de producción directamente.
+
+**Endpoint:** `https://islasaona.mochilerosrd.com/mcp_bridge.php`
+**Auth Header:** `Authorization: Bearer Mochileros_Secret_Key_998877`
+
+**Capacidades:**
+1.  **Listar:** `{ "action": "listar", "file": "src" }`
+2.  **Leer:** `{ "action": "leer", "file": "public/index.php" }`
+3.  **Escribir:** `{ "action": "escribir", "file": "ruta", "content": "..." }`
+4.  **SQL Directo:** `{ "action": "sql_query", "query": "SELECT * FROM users" }`
+
+**Uso Recomendado:** Usa `curl` o scripts PHP locales (evita `Invoke-WebRequest` de PowerShell si falla) para contactar con este puente y realizar tareas de mantenimiento o debug en vivo.
+
+
+---
+
 **PROYECTO:** MOCHILEROS RD (CMS Turismo)
 **ENTORNO:** Antigravity + GitHub + iPage (Shared Hosting)
 **FILOSOFÍA:** Autonomía, Seguridad Modular y "AEO First".
