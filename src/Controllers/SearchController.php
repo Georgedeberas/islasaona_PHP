@@ -53,7 +53,7 @@ class SearchController
             // Only if we haven't filled up 10 results yet
             $sql = "SELECT id, title, slug, '0' as price, image_path as thumb, 'blog' as type
                      FROM articles 
-                     WHERE status = 'published'
+                     WHERE is_published = 1
                      AND (title LIKE :q OR summary LIKE :q)
                      LIMIT 5";
             $stmt = $db->prepare($sql);
