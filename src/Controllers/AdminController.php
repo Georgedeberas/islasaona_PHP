@@ -24,10 +24,13 @@ class AdminController
             $allTours = $tourModel->getAll(false);
 
             // Tour Stats
+            // Tour Stats
             $stats = [
                 'total_tours' => count($allTours),
-                'active_tours' => count(array_filter($allTours, fn($t) => $t['is_active'] == 1)),
-                'inactive_tours' => count(array_filter($allTours, fn($t) => $t['is_active'] == 0)),
+                'active_tours' => count(array_filter($allTours, function ($t) {
+                    return $t['is_active'] == 1; })),
+                'inactive_tours' => count(array_filter($allTours, function ($t) {
+                    return $t['is_active'] == 0; })),
             ];
 
             // Analytics Filter
