@@ -146,6 +146,7 @@ $whatsapp = $settings['whatsapp_number'] ?? '';
             <nav class="hidden md:flex space-x-8 items-center font-medium text-gray-700">
                 <a href="/" class="hover:text-primary transition">Inicio</a>
                 <a href="/#tours" class="hover:text-primary transition">Tours</a>
+                <a href="/blog" class="hover:text-primary transition">Blog</a>
 
                 <!-- Páginas Dinámicas -->
                 <?php foreach ($menuPages as $mp): ?>
@@ -274,6 +275,7 @@ $whatsapp = $settings['whatsapp_number'] ?? '';
         <div id="mobile-menu" class="hidden md:hidden border-t">
             <a href="/" class="block px-4 py-2 hover:bg-gray-100">Inicio</a>
             <a href="/#tours" class="block px-4 py-2 hover:bg-gray-100">Tours</a>
+            <a href="/blog" class="block px-4 py-2 hover:bg-gray-100">Blog</a>
             <?php foreach ($menuPages as $mp): ?>
                 <a href="/<?= $mp['slug'] ?>"
                     class="block px-4 py-2 hover:bg-gray-100"><?= htmlspecialchars($mp['title']) ?></a>
