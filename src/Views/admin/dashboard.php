@@ -48,7 +48,7 @@ $stats = $stats ?? ['total_tours' => 0, 'active_tours' => 0, 'inactive_tours' =>
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="text-uppercase fw-bold text-primary small mb-1">Artículos Blog</div>
-                            <div class="h3 mb-0 fw-bold text-dark">--</div> <!-- Placeholder for now -->
+                            <div class="h3 mb-0 fw-bold text-dark"><?= $stats['total_articles'] ?? 0 ?></div>
                         </div>
                         <div class="text-gray-300">
                             <i class="fs-1 opacity-25">📰</i>
@@ -85,7 +85,7 @@ $stats = $stats ?? ['total_tours' => 0, 'active_tours' => 0, 'inactive_tours' =>
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <div class="text-uppercase fw-bold text-warning small mb-1">Contactos WA</div>
-                            <div class="h3 mb-0 fw-bold text-dark">45</div>
+                            <div class="h3 mb-0 fw-bold text-dark"><?= $stats['wa_clicks'] ?? 0 ?></div>
                         </div>
                         <div class="text-gray-300">
                             <i class="fs-1 opacity-25">💬</i>

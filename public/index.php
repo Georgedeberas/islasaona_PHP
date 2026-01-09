@@ -91,6 +91,8 @@ try {
         $home->index();
     } elseif ($requestUri === '/blog') {
         (new \App\Controllers\ArticleController())->index();
+    } elseif (strpos($requestUri, '/api/search') === 0) {
+        (new \App\Controllers\SearchController())->search();
     } elseif (preg_match('#^/blog/([\w-]+)$#', $requestUri, $matches)) {
         (new \App\Controllers\ArticleController())->show($matches[1]);
     } elseif (preg_match('#^/tour/([\w-]+)$#', $requestUri, $matches)) {

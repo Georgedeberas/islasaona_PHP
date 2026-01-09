@@ -156,10 +156,17 @@ $whatsapp = $settings['whatsapp_number'] ?? '';
             </nav>
 
             <!-- Search Bar (Desktop) -->
-            <div class="relative hidden lg:block w-64 mx-4">
+            <div
+                class="relative hidden lg:flex w-80 mx-4 bg-gray-50 border border-gray-200 rounded-full p-1 focus-within:ring-2 focus-within:ring-primary transition shadow-sm hover:shadow items-center">
+                <select id="searchType"
+                    class="bg-transparent text-xs font-bold text-gray-600 py-1 pl-3 pr-2 outline-none border-r border-gray-200 cursor-pointer hover:text-primary">
+                    <option value="all">Todo</option>
+                    <option value="tours">Tours</option>
+                    <option value="blog">Blog</option>
+                </select>
                 <input type="text" name="q" placeholder="Buscar paraíso..."
-                    class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary focus:outline-none transition text-sm text-gray-700 shadow-sm hover:shadow">
-                <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor"
+                    class="flex-grow pl-3 pr-8 py-1 bg-transparent focus:outline-none text-sm text-gray-700 placeholder-gray-400">
+                <svg class="w-4 h-4 text-gray-400 absolute right-3" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>

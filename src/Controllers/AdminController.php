@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\Tour;
 use App\Models\User;
+use App\Models\Article;
 use Exception;
 
 class AdminController
@@ -23,14 +24,29 @@ class AdminController
             $tourModel = new Tour();
             $allTours = $tourModel->getAll(false);
 
-            // Tour Stats
-            // Tour Stats
+            $articleModel = new Article();
+            $totalArticles = count($articleModel->getAll());
+
+            // WA Stats (Phase 7)
+            $waClicks = 0;
+            try {
+                $db = \App\Config\Database::getConnection();
+                $stmtWa = $db->query("SELECT COUNT(*) FROM click_tracks WHERE track_type = 'whatsapp'");
+                if ($stmtWa)
+                    $waClicks = $stmtWa->fetchColumn();
+            } catch (\Exception $ignore) {
+            }
+
             $stats = [
                 'total_tours' => count($allTours),
                 'active_tours' => count(array_filter($allTours, function ($t) {
-                    return $t['is_active'] == 1; })),
+                    return $t['is_active'] == 1;
+                })),
                 'inactive_tours' => count(array_filter($allTours, function ($t) {
-                    return $t['is_active'] == 0; })),
+                    return $t['is_active'] == 0;
+                })),
+                'total_articles' => $totalArticles,
+                'wa_clicks' => $waClicks
             ];
 
             // Analytics Filter

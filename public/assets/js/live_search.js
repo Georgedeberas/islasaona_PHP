@@ -21,6 +21,16 @@ function initLiveSearch() {
         searchInput.parentNode.appendChild(resultsContainer);
     }
 
+    // Trigger on select change too
+    const typeSelect = document.getElementById('searchType');
+    if (typeSelect) {
+        typeSelect.addEventListener('change', function () {
+            if (searchInput.value.trim().length >= 2) {
+                searchInput.dispatchEvent(new Event('input'));
+            }
+        });
+    }
+
     let debounceTimer;
 
     searchInput.addEventListener('input', function (e) {
@@ -47,13 +57,8 @@ function initLiveSearch() {
 }
 
 function fetchSearch(query, container) {
-    // Simulamos búsqueda o conectamos a endpoint real
-    // Como no tenemos endpoint JSON de search, usaremos el endpoint de tours y filtraremos en cliente (o crearemos endpoint)
-    // Opción PRO: Crear endpoint dedicado /api/search?q=...
-    // Opción Rápida: Usar endpoint existente y filtrar (no ideal para large sets)
-
-    // Vamos a asumir que crearemos un endpoint ligero de búsqueda en Phase 6 Backend parts.
-    fetch(`/api/search?q=${encodeURIComponent(query)}`)
+    const type = document.getElementById('searchType') ? document.getElementById('searchType').value : 'all';
+    fetch(`/api/search?q=${encodeURIComponent(query)}&type=${type}`)
         .then(res => res.json())
         .then(data => {
             renderResults(data, container);
