@@ -8,6 +8,12 @@ if (!isset($conf)) {
     foreach ($settingsRaw_f as $s)
         $conf[$s['setting_key']] = $s['setting_value'];
 }
+
+// Generate WhatsApp Link ensuring it's always available in the footer scope
+$phoneClean = preg_replace('/[^0-9]/', '', $conf['contact_phone'] ?? '');
+// Default fallback if no phone is set
+if(empty($phoneClean)) $phoneClean = "18090000000"; 
+$waLink = "https://wa.me/{$phoneClean}?text=" . urlencode("Hola, me gustaría más información sobre los tours de Isla Saona.");
 ?>
 </main>
 <!-- Footer -->
