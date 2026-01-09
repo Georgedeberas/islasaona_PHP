@@ -30,6 +30,15 @@ class Page
         return $stmt->fetch();
     }
 
+    public function getById($id)
+    {
+        $sql = "SELECT * FROM pages WHERE id = :id LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch();
+    }
+
     public function create($title, $slug, $content, $template = 'classic', $meta_data = null, $order_index = 0)
     {
         $sql = "INSERT INTO pages (title, slug, content, template, meta_data, order_index) VALUES (:title, :slug, :content, :template, :meta_data, :order_index)";

@@ -7,45 +7,63 @@ use PDOException;
 
 class Database
 {
-    private static $host = 'nexosystem.yourwebhostingmysql.com';
-    private static $db_name = 'mochilerosrd_islasaona';
-    private static $username = 'islasaona';
-    private static $password = 'Islasaonaervi123456';
     private static $conn = null;
 
     public static function getConnection()
     {
         if (self::$conn === null) {
-            try {
-                // Configurar DSN
-                $dsn = "mysql:host=" . self::$host . ";dbname=" . self::$db_name . ";charset=utf8mb4";
+            self::loadEnv();
 
-                // Instanciar PDO con opciones robustas
-                self::$conn = new PDO($dsn, self::$username, self::$password, [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Lanzar excepciones reales
+            $host = $_ENV['DB_HOST'] ?? 'localhost';
+            $db_name = $_ENV['DB_NAME'] ?? '';
+            $username = $_ENV['DB_USER'] ?? '';
+            $password = $_ENV['DB_PASS'] ?? '';
+
+            try {
+                $dsn = "mysql:host=" . $host . ";dbname=" . $db_name . ";charset=utf8mb4";
+
+                self::$conn = new PDO($dsn, $username, $password, [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                     PDO::ATTR_EMULATE_PREPARES => false,
                     PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
                 ]);
 
             } catch (PDOException $exception) {
-                // Si falla la conexión principal, intentar Localhost (Fallback común en Shared Hosting)
-                if (strpos($exception->getMessage(), 'host') !== false) {
-                    try {
-                        $dsnLocal = "mysql:host=localhost;dbname=" . self::$db_name . ";charset=utf8mb4";
-                        self::$conn = new PDO($dsnLocal, self::$username, self::$password, [
-                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-                        ]);
-                        return self::$conn;
-                    } catch (PDOException $e2) {
-                        // Error fatal visible para debug inmediato
-                        die("<h1>Error de Base de Datos (Fatal)</h1><p>No se pudo conectar ni remoto ni local. " . $e2->getMessage() . "</p>");
-                    }
-                }
-
-                die("<h1>Error de Base de Datos</h1><p>" . $exception->getMessage() . "</p>");
+                // Log error privately
+                error_log("DB Connection Error: " . $exception->getMessage());
+                // Generic error for user
+                die("<h1>500 Internal Server Error</h1><p>Database connection failed.</p>");
             }
         }
         return self::$conn;
+    }
+
+    private static function loadEnv()
+    {
+        if (isset($_ENV['DB_HOST']))
+            return; // Already loaded
+
+        $path = __DIR__ . '/../../.env';
+        if (!file_exists($path))
+            return;
+
+        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (strpos(trim($line), '#') === 0)
+                continue;
+
+            if (strpos($line, '=') !== false) {
+                list($name, $value) = explode('=', $line, 2);
+                $name = trim($name);
+                $value = trim($value);
+
+                if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
+                    putenv(sprintf('%s=%s', $name, $value));
+                    $_ENV[$name] = $value;
+                    $_SERVER[$name] = $value;
+                }
+            }
+        }
     }
 }

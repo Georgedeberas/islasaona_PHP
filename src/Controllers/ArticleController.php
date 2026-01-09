@@ -74,9 +74,20 @@ class ArticleController
 
         // Handle Image
         if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-            $upload = $this->handleUpload($_FILES['image']);
-            if ($upload) {
-                $data['image_path'] = $upload;
+            $file = [
+                'tmp_name' => $_FILES['image']['tmp_name'],
+                'name' => $_FILES['image']['name'],
+                'type' => $_FILES['image']['type'],
+                'error' => 0,
+                'size' => $_FILES['image']['size']
+            ];
+
+            $dir = __DIR__ . '/../../public/assets/uploads/blog/';
+            // Use ImageService (optimize to WebP)
+            $savedName = ImageService::optimizeAndSave($file, $dir);
+
+            if ($savedName) {
+                $data['image_path'] = 'assets/uploads/blog/' . $savedName;
             }
         }
 
@@ -107,20 +118,7 @@ class ArticleController
         exit;
     }
 
-    private function handleUpload($file)
-    {
-        $dir = __DIR__ . '/../../public/assets/uploads/blog/';
-        if (!is_dir($dir))
-            mkdir($dir, 0755, true);
 
-        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $name = 'blog_' . uniqid() . '.' . $ext;
-
-        if (move_uploaded_file($file['tmp_name'], $dir . $name)) {
-            return 'assets/uploads/blog/' . $name;
-        }
-        return null;
-    }
 
     private function slugify($text)
     {

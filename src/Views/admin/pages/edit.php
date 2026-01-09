@@ -238,6 +238,33 @@
 
                                 </div>
                             </div>
+                            </div>
+                        </div>
+
+                        <!-- SEO Box -->
+                        <div class="card shadow-sm border-0 mt-4">
+                            <div class="card-header bg-white border-bottom py-3">
+                                <h6 class="m-0 fw-bold text-primary">Optimización SEO (Google)</h6>
+                            </div>
+                            <div class="card-body p-4 bg-white">
+                                <div class="mb-3">
+                                    <label class="form-label">Meta Título</label>
+                                    <input type="text" name="meta_title" class="form-control"
+                                        placeholder="Título que aparece en Google (opcional)"
+                                        value="<?= htmlspecialchars($meta['meta_title'] ?? '') ?>">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Meta Descripción</label>
+                                    <textarea name="meta_description" class="form-control" rows="2"
+                                        placeholder="Resumen para Google (opcional)"><?= htmlspecialchars($meta['meta_description'] ?? '') ?></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Palabras Clave (Keywords)</label>
+                                    <input type="text" name="keywords" class="form-control"
+                                        placeholder="tours, saona, playa, ..."
+                                        value="<?= htmlspecialchars($meta['keywords'] ?? '') ?>">
+                                </div>
+                            </div>
                         </div>
 
                     </div>

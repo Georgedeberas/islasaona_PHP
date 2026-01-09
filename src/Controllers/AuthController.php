@@ -4,8 +4,6 @@ namespace App\Controllers;
 
 use App\Models\User;
 
-session_start();
-
 class AuthController
 {
     public function login()

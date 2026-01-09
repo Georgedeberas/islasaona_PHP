@@ -71,10 +71,21 @@ require __DIR__ . '/../layout/header.php';
                                 </td>
                                 <td class="small text-muted"><?= $page['updated_at'] ?? $page['created_at'] ?></td>
                                 <td class="text-end pe-4">
-                                    <a href="/admin/pages/edit?id=<?= $page['id'] ?>"
-                                        class="btn btn-sm btn-light text-primary border" title="Editar">
-                                        <i class="fas fa-pen"></i> Editar
+                                    <a href="/admin/pages/duplicate?id=<?= $page['id'] ?>"
+                                        class="btn btn-sm btn-light text-success border me-1" title="Duplicar">
+                                        <i class="fas fa-copy"></i>
                                     </a>
+                                    <a href="/admin/pages/edit?id=<?= $page['id'] ?>"
+                                        class="btn btn-sm btn-light text-primary border me-1" title="Editar">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <?php if (!in_array($page['slug'], ['home', 'contact', 'about', 'tours', 'gallery'])): ?>
+                                        <a href="/admin/pages/delete?id=<?= $page['id'] ?>"
+                                            class="btn btn-sm btn-light text-danger border" title="Eliminar"
+                                            onclick="return confirm('¿Estás seguro de eliminar esta página permanentemente?');">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

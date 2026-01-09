@@ -26,7 +26,13 @@ class TourController
     }
 
     // ADMIN ACTIONS
-    // Estas requieren Auth. Deberíamos llamar AuthController::requireLogin() en cada uno.
+    public function adminIndex()
+    {
+        AuthController::requireLogin();
+        $tourModel = new Tour();
+        $tours = $tourModel->getAll(false);
+        require __DIR__ . '/../Views/admin/tours/index.php';
+    }
 
     public function create()
     {

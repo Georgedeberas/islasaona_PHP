@@ -285,6 +285,15 @@
                                         </select>
                                         <div class="form-text small">Usa Ctrl+Click (Win) o Cmd+Click (Mac) para
                                             seleccionar varios.</div>
+
+                                        <div class="mt-3 border-top pt-3">
+                                            <label class="form-label small fw-bold">Enlace "Ver todos los tours"</label>
+                                            <input type="text" name="home_view_all_link" class="form-control"
+                                                placeholder="Ej: /#tours o /tours"
+                                                value="<?= $val('home_view_all_link') ?>">
+                                            <div class="form-text small">Deja vacío para usar el valor por defecto
+                                                (/#tours).</div>
+                                        </div>
                                     </div>
                                 </div>
 

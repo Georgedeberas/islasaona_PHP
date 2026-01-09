@@ -38,10 +38,19 @@ class Setting
 
     public function updateBatch($data)
     {
-        $sql = "UPDATE settings SET setting_value = :value WHERE setting_key = :key";
-        $stmt = $this->db->prepare($sql);
-
         foreach ($data as $key => $value) {
+            // Check existence
+            $check = $this->db->prepare("SELECT id FROM settings WHERE setting_key = :key");
+            $check->execute([':key' => $key]);
+
+            if ($check->fetch()) {
+                $sql = "UPDATE settings SET setting_value = :value WHERE setting_key = :key";
+            } else {
+                // Default group 'general', type 'text'. In a real app we might want more control, but for auto-saving dynamic fields this works.
+                $sql = "INSERT INTO settings (setting_key, setting_value, setting_group, setting_type) VALUES (:key, :value, 'dynamic', 'text')";
+            }
+
+            $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':value', $value);
             $stmt->bindValue(':key', $key);
             $stmt->execute();

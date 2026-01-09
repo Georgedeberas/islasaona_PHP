@@ -69,7 +69,11 @@ class PageController
             $template = $_POST['template'] ?? 'classic';
 
             // Recolectar Meta Data según plantilla
-            $metaData = [];
+            $metaData = [
+                'meta_title' => $_POST['meta_title'] ?? '',
+                'meta_description' => $_POST['meta_description'] ?? '',
+                'keywords' => $_POST['keywords'] ?? ''
+            ];
 
             // 1. Landing Page Fields
             if ($template === 'landing') {
@@ -204,7 +208,11 @@ class PageController
 
             // Recolectar Meta Data
             $currentMeta = json_decode($page['meta_data'] ?? '[]', true) ?? [];
-            $newMeta = [];
+            $newMeta = [
+                'meta_title' => $_POST['meta_title'] ?? '',
+                'meta_description' => $_POST['meta_description'] ?? '',
+                'keywords' => $_POST['keywords'] ?? ''
+            ];
 
             // 1. Landing Logic
             if ($template === 'landing') {
@@ -280,5 +288,60 @@ class PageController
         $page['meta_data'] = json_decode($page['meta_data'] ?? '[]', true);
 
         require __DIR__ . '/../Views/admin/pages/edit.php';
+    }
+    // ADMIN: DUPLICAR
+    public function duplicate()
+    {
+        AuthController::requireLogin();
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            header('Location: /admin/pages?error=Falta ID');
+            exit;
+        }
+
+        $pageModel = new Page();
+        $page = $pageModel->getById($id);
+
+        if (!$page) {
+            header('Location: /admin/pages?error=Pagina no encontrada');
+            exit;
+        }
+
+        // Crear copia
+        $newTitle = "[Copia] " . $page['title'];
+        $newSlug = $page['slug'] . "-copia-" . time();
+        $content = $page['content'];
+        $template = $page['template'];
+        $metaData = $page['meta_data']; // JSON
+        $order = intval($page['order_index']) + 1;
+
+        $pageModel->create($newTitle, $newSlug, $content, $template, $metaData, $order);
+
+        header('Location: /admin/pages?saved=1&msg=Página duplicada correctamente');
+        exit;
+    }
+
+    // ADMIN: ELIMINAR
+    public function delete()
+    {
+        AuthController::requireLogin();
+        $id = $_GET['id'] ?? null;
+        if (!$id) {
+            header('Location: /admin/pages?error=Falta ID');
+            exit;
+        }
+
+        $pageModel = new Page();
+        $page = $pageModel->getById($id);
+
+        // Protección de páginas sistema
+        if (in_array($page['slug'], ['home', 'contact', 'about', 'tours', 'gallery'])) {
+            header('Location: /admin/pages?error=No puedes eliminar páginas base del sistema');
+            exit;
+        }
+
+        $pageModel->delete($id);
+        header('Location: /admin/pages?saved=1&msg=Página eliminada');
+        exit;
     }
 }

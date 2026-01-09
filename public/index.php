@@ -52,9 +52,10 @@ try {
         } elseif ($requestUri === '/admin/logout') {
             $auth->logout();
         } elseif ($requestUri === '/admin/dashboard') {
+        } elseif ($requestUri === '/admin/dashboard') {
             (new AdminController())->dashboard();
         } elseif ($requestUri === '/admin/tours') {
-            (new AdminController())->tours();
+            (new TourController())->adminIndex();
         } elseif ($requestUri === '/admin/tours/create') {
             (new TourController())->create();
         } elseif ($requestUri === '/admin/tours/edit') {
@@ -68,6 +69,10 @@ try {
         } // NEW
         elseif ($requestUri === '/admin/pages/edit') {
             (new PageController())->edit();
+        } elseif ($requestUri === '/admin/pages/duplicate') {
+            (new PageController())->duplicate();
+        } elseif ($requestUri === '/admin/pages/delete') {
+            (new PageController())->delete();
         } elseif ($requestUri === '/admin/articles') {
             (new \App\Controllers\ArticleController())->adminIndex();
         } elseif ($requestUri === '/admin/articles/edit') {
