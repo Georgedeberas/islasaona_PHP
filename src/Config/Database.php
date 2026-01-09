@@ -7,28 +7,20 @@ use PDOException;
 
 class Database
 {
+    private static $host = 'nexosystem.yourwebhostingmysql.com';
+    private static $db_name = 'mochilerosrd_islasaona';
+    private static $username = 'islasaona';
+    private static $password = 'Islasaonaervi123456';
     private static $conn = null;
 
     public static function getConnection()
     {
         if (self::$conn === null) {
-
-            // Cargar configuración nativa (PHP Array)
-            $configPath = __DIR__ . '/config.php';
-            if (!file_exists($configPath)) {
-                die("<h1>Error de Configuración</h1><p>Archivo config.php no encontrado.</p>");
-            }
-            $config = require $configPath;
-
-            $host = $config['DB_HOST'] ?? 'localhost';
-            $db_name = $config['DB_NAME'] ?? '';
-            $username = $config['DB_USER'] ?? '';
-            $password = $config['DB_PASS'] ?? '';
-
             try {
-                $dsn = "mysql:host=" . $host . ";dbname=" . $db_name . ";charset=utf8mb4";
+                // Configurar DSN
+                $dsn = "mysql:host=" . self::$host . ";dbname=" . self::$db_name . ";charset=utf8mb4";
 
-                self::$conn = new PDO($dsn, $username, $password, [
+                self::$conn = new PDO($dsn, self::$username, self::$password, [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                     PDO::ATTR_EMULATE_PREPARES => false,
@@ -36,10 +28,21 @@ class Database
                 ]);
 
             } catch (PDOException $exception) {
-                // Log error privately
-                error_log("DB Connection Error: " . $exception->getMessage());
-                // Generic error for user
-                die("<h1>500 Internal Server Error</h1><p>Database connection failed.</p>");
+                // Si falla la conexión principal, intentar Localhost (Fallback común en Shared Hosting)
+                if (strpos($exception->getMessage(), 'host') !== false) {
+                    try {
+                        $dsnLocal = "mysql:host=localhost;dbname=" . self::$db_name . ";charset=utf8mb4";
+                        self::$conn = new PDO($dsnLocal, self::$username, self::$password, [
+                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+                        ]);
+                        return self::$conn;
+                    } catch (PDOException $e2) {
+                        // Error fatal visible para debug inmediato
+                        die("<h1>Error de Base de Datos (Fatal)</h1><p>No se pudo conectar ni remoto ni local. " . $e2->getMessage() . "</p>");
+                    }
+                }
+
+                die("<h1>Error de Base de Datos</h1><p>" . $exception->getMessage() . "</p>");
             }
         }
         return self::$conn;
