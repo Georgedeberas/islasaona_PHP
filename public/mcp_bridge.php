@@ -12,7 +12,7 @@ ini_set('display_errors', 0); // Ocultar errores HTML para no romper el JSON
 // ===================================================================
 
 // 1. Define aquí tu clave maestra (invéntate una larga):
-$SECRET_TOKEN = "GeorgeDeberas2024_SuperSecretMCPMasterKey_998877";
+$SECRET_TOKEN = "Mochileros_Secret_Key_998877";
 
 // 2. Define aquí los datos de tu Base de Datos de iPage:
 $DB_HOST = "nexosystem.yourwebhostingmysql.com";        // Generalmente es 'localhost' en iPage
