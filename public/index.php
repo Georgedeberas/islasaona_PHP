@@ -53,7 +53,6 @@ try {
         } elseif ($requestUri === '/admin/logout') {
             $auth->logout();
         } elseif ($requestUri === '/admin/dashboard') {
-        } elseif ($requestUri === '/admin/dashboard') {
             (new AdminController())->dashboard();
         } elseif ($requestUri === '/admin/tours') {
             (new TourController())->adminIndex();
